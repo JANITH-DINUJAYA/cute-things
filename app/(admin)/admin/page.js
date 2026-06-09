@@ -1,64 +1,55 @@
-import { adminDb } from '@/lib/firebase/admin';
+'use client';
+
+import { useState, useEffect } from 'react';
 import DashboardClient from './DashboardClient';
 
-export const dynamic = 'force-dynamic';
+export default function DashboardPage() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-async function getStats() {
-  try {
-    const [ordersSnap, productsSnap, customersSnap] = await Promise.all([
-      adminDb.collection('orders').get(),
-      adminDb.collection('products').get(),
-      adminDb.collection('customers').get(),
-    ]);
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch('/api/admin/stats');
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load dashboard stats');
+        }
+        setStats(data.stats);
+      } catch (err) {
+        console.error('[load stats]', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
-    const orders   = ordersSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    const products = productsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-    const revenue       = orders.filter((o) => o.status === 'completed').reduce((s, o) => s + (o.total || 0), 0);
-    const pendingOrders = orders.filter((o) => o.status === 'pending').length;
-    const lowStock      = products.filter((p) => p.stock > 0 && p.stock <= 5).length;
-    const outOfStock    = products.filter((p) => p.stock === 0).length;
-
-    const recentOrders  = orders
-      .sort((a, b) => {
-        const timeA = a.createdAt?.seconds ?? (a.createdAt ? new Date(a.createdAt).getTime() : 0);
-        const timeB = b.createdAt?.seconds ?? (b.createdAt ? new Date(b.createdAt).getTime() : 0);
-        return timeB - timeA;
-      })
-      .slice(0, 8)
-      .map((o) => {
-        const parseDate = (val) => {
-          if (!val) return null;
-          if (typeof val.toDate === 'function') return val.toDate().toISOString();
-          if (val instanceof Date) return val.toISOString();
-          if (typeof val === 'string') return val;
-          if (val.seconds) return new Date(val.seconds * 1000).toISOString();
-          return null;
-        };
-        return {
-          ...o,
-          createdAt: parseDate(o.createdAt),
-          updatedAt: parseDate(o.updatedAt),
-        };
-      });
-
-    return {
-      totalOrders:    orders.length,
-      totalProducts:  products.length,
-      totalCustomers: customersSnap.size,
-      revenue,
-      pendingOrders,
-      lowStock,
-      outOfStock,
-      recentOrders,
-    };
-  } catch (err) {
-    console.error('[dashboard]', err);
-    return { totalOrders: 0, totalProducts: 0, totalCustomers: 0, revenue: 0, pendingOrders: 0, lowStock: 0, outOfStock: 0, recentOrders: [] };
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 20 }}>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="skeleton" style={{ height: 140, borderRadius: 12 }} />
+          ))}
+        </div>
+        <div className="skeleton" style={{ height: 350, borderRadius: 12 }} />
+      </div>
+    );
   }
-}
 
-export default async function DashboardPage() {
-  const stats = await getStats();
+  if (error) {
+    return (
+      <div className="card" style={{ padding: 24, color: '#dc2626', background: '#fff5f5' }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>Error loading dashboard</h3>
+        <p style={{ margin: 0, fontSize: 14 }}>{error}</p>
+      </div>
+    );
+  }
+
   return <DashboardClient stats={stats} />;
 }
