@@ -18,6 +18,7 @@ const nextConfig = {
       },
     ];
   },
+  transpilePackages: ['jwks-rsa', 'jose'],
 };
 
 export default nextConfig;
