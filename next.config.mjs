@@ -18,7 +18,7 @@ const nextConfig = {
       },
     ];
   },
-  transpilePackages: ['jwks-rsa', 'jose'],
+  transpilePackages: ['firebase-admin', 'jwks-rsa', 'jose'],
 };
 
 export default nextConfig;
