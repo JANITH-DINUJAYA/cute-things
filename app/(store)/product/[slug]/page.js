@@ -1,31 +1,11 @@
 import { notFound } from 'next/navigation';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client';
+import { getProductBySlug } from '@/lib/firebase/server';
 import ProductDetailClient from './ProductDetailClient';
 
 export const revalidate = 30;
 
-async function getProduct(slug) {
-  try {
-    const q = query(collection(db, 'products'), where('slug', '==', slug), limit(1));
-    const snap = await getDocs(q);
-    if (snap.empty) return null;
-    const doc = snap.docs[0];
-    const data = doc.data();
-    // Serialize Firestore timestamps
-    return {
-      id: doc.id,
-      ...data,
-      createdAt: data.createdAt?.toMillis?.() ?? null,
-      updatedAt: data.updatedAt?.toMillis?.() ?? null,
-    };
-  } catch {
-    return null;
-  }
-}
-
 export async function generateMetadata({ params }) {
-  const product = await getProduct(params.slug);
+  const product = await getProductBySlug(params.slug);
   if (!product) return { title: 'Product Not Found' };
   return {
     title: product.name,
@@ -39,23 +19,23 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductDetailPage({ params }) {
-  const product = await getProduct(params.slug);
+  const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
-  // JSON-LD structured data
   const jsonLd = {
-    '@context':       'https://schema.org',
-    '@type':          'Product',
-    name:             product.name,
-    description:      product.description,
-    image:            product.images,
-    sku:              product.sku,
+    '@context':      'https://schema.org',
+    '@type':         'Product',
+    name:            product.name,
+    description:     product.description,
+    image:           product.images,
     offers: {
-      '@type':        'Offer',
-      price:          product.discountPrice ?? product.price,
-      priceCurrency:  'LKR',
-      availability:   product.status === 'active' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      seller:         { '@type': 'Organization', name: 'Cute Things' },
+      '@type':       'Offer',
+      price:         product.compareAtPrice ?? product.price,
+      priceCurrency: 'LKR',
+      availability:  product.status === 'active'
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: 'Cute Things' },
     },
   };
 

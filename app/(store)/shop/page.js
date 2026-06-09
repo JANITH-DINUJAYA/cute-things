@@ -1,8 +1,7 @@
-import { db } from '@/lib/firebase/client';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { getProducts } from '@/lib/firebase/server';
 import ProductCard from '@/components/store/ProductCard';
 import Link from 'next/link';
-import { SlidersHorizontal } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: 'Shop All Products',
@@ -11,62 +10,26 @@ export const metadata = {
 
 export const revalidate = 30;
 
-const categoryMap = {
-  'plush-toys':     'Plush Toys',
-  'accessories':    'Accessories',
-  'gifts':          'Gifts',
-  'anime-plushies': 'Anime Plushies',
-};
-
-async function getProducts(categorySlug) {
-  try {
-    let q;
-    if (categorySlug && categoryMap[categorySlug]) {
-      // Filter by category name (simple approach — can be refactored to use categoryId)
-      q = query(
-        collection(db, 'products'),
-        where('status', '==', 'active'),
-        orderBy('createdAt', 'desc')
-      );
-    } else {
-      q = query(
-        collection(db, 'products'),
-        where('status', '==', 'active'),
-        orderBy('createdAt', 'desc')
-      );
-    }
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-  } catch {
-    return [];
-  }
-}
-
 const categoryLinks = [
-  { label: 'All',          href: '/shop',               slug: null            },
-  { label: '🧸 Plush Toys', href: '/shop/plush-toys',   slug: 'plush-toys'    },
-  { label: '🔑 Accessories',href: '/shop/accessories',  slug: 'accessories'   },
-  { label: '🎁 Gifts',      href: '/shop/gifts',        slug: 'gifts'         },
-  { label: '⭐ Anime',      href: '/shop/anime-plushies',slug: 'anime-plushies'},
+  { label: 'All',           href: '/shop',                slug: null             },
+  { label: '🧸 Plush Toys', href: '/shop/plush-toys',     slug: 'plush-toys'     },
+  { label: '🔑 Accessories',href: '/shop/accessories',    slug: 'accessories'    },
+  { label: '🎁 Gifts',      href: '/shop/gifts',          slug: 'gifts'          },
+  { label: '⭐ Anime',      href: '/shop/anime-plushies', slug: 'anime-plushies' },
 ];
 
-export default async function ShopPage({ params }) {
-  const categorySlug = params?.category || null;
-  const products = await getProducts(categorySlug);
-
-  const pageTitle = categorySlug
-    ? (categoryMap[categorySlug] ?? 'Products')
-    : 'All Products';
+export default async function ShopPage() {
+  const products = await getProducts();
 
   return (
     <div style={{ minHeight: '70vh' }}>
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #f5f0eb 0%, #eae3dc 100%)', padding: '48px 24px 40px', borderBottom: '1px solid #eae3dc' }}>
+      <div style={{ background: 'linear-gradient(135deg,#f5f0eb 0%,#eae3dc 100%)', padding: '48px 24px 40px', borderBottom: '1px solid #eae3dc' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', fontWeight: 400, fontFamily: 'var(--font-serif)', color: '#1e1a1d', margin: '0 0 8px', letterSpacing: '0.02em' }}>
-            {pageTitle}
+            All Products
           </h1>
-          <p style={{ color: '#888888', margin: 0 }}>{products.length} products found</p>
+          <p style={{ color: '#888', margin: 0 }}>{products.length} products found</p>
         </div>
       </div>
 
@@ -74,21 +37,17 @@ export default async function ShopPage({ params }) {
         {/* Category Pills */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 40 }}>
           {categoryLinks.map((c) => {
-            const isActive = c.slug === categorySlug;
+            const isActive = c.slug === null;
             return (
-              <Link
-                key={c.href}
-                href={c.href}
-                style={{
-                  textDecoration: 'none', padding: '8px 18px',
-                  borderRadius: 9999, fontSize: 14, fontWeight: 500,
-                  background: isActive ? '#1e1a1d' : '#fff',
-                  color: isActive ? '#fff' : '#1e1a1d',
-                  border: `1.5px solid ${isActive ? '#1e1a1d' : '#eae3dc'}`,
-                  transition: 'all .2s',
-                  boxShadow: isActive ? '0 4px 12px rgba(30,26,29,.12)' : 'none',
-                }}
-              >
+              <Link key={c.href} href={c.href} style={{
+                textDecoration: 'none', padding: '8px 18px',
+                borderRadius: 9999, fontSize: 14, fontWeight: 500,
+                background: isActive ? '#1e1a1d' : '#fff',
+                color: isActive ? '#fff' : '#1e1a1d',
+                border: `1.5px solid ${isActive ? '#1e1a1d' : '#eae3dc'}`,
+                transition: 'all .2s',
+                boxShadow: isActive ? '0 4px 12px rgba(30,26,29,.12)' : 'none',
+              }}>
                 {c.label}
               </Link>
             );
