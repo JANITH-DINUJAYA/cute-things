@@ -14,8 +14,11 @@ const montserrat = Montserrat({
   weight: ['300', '400', '500', '600', '700', '800'],
 });
 
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+const safeSiteUrl = rawSiteUrl.startsWith('http') ? rawSiteUrl : `https://${rawSiteUrl}`;
+
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(safeSiteUrl),
   title: {
     default: 'Cute Things — Plush Toys, Gifts & Cute Accessories in Sri Lanka',
     template: '%s | Cute Things',
