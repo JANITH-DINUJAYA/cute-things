@@ -20,13 +20,27 @@ async function getStats() {
     const outOfStock    = products.filter((p) => p.stock === 0).length;
 
     const recentOrders  = orders
-      .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))
+      .sort((a, b) => {
+        const timeA = a.createdAt?.seconds ?? (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const timeB = b.createdAt?.seconds ?? (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return timeB - timeA;
+      })
       .slice(0, 8)
-      .map((o) => ({
-        ...o,
-        createdAt: o.createdAt?.toDate?.()?.toISOString() ?? null,
-        updatedAt: o.updatedAt?.toDate?.()?.toISOString() ?? null,
-      }));
+      .map((o) => {
+        const parseDate = (val) => {
+          if (!val) return null;
+          if (typeof val.toDate === 'function') return val.toDate().toISOString();
+          if (val instanceof Date) return val.toISOString();
+          if (typeof val === 'string') return val;
+          if (val.seconds) return new Date(val.seconds * 1000).toISOString();
+          return null;
+        };
+        return {
+          ...o,
+          createdAt: parseDate(o.createdAt),
+          updatedAt: parseDate(o.updatedAt),
+        };
+      });
 
     return {
       totalOrders:    orders.length,

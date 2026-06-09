@@ -12,7 +12,8 @@ export default function CartPage() {
   const items   = useCartStore((s) => s.items);
   const remove  = useCartStore((s) => s.removeItem);
   const setQty  = useCartStore((s) => s.setQuantity);
-  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const subtotal   = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
+  const totalQty   = items.reduce((s, i) => s + i.quantity, 0);
 
   useEffect(() => {
     // Fire pixel
@@ -41,7 +42,7 @@ export default function CartPage() {
       </Link>
 
       <h1 style={{ fontSize: 'clamp(24px,4vw,36px)', fontWeight: 800, marginBottom: 40 }}>
-        Shopping Cart <span className="gradient-brand-text">({items.length} items)</span>
+        Shopping Cart <span className="gradient-brand-text">({totalQty} {totalQty === 1 ? 'item' : 'items'})</span>
       </h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 32, alignItems: 'start' }}>
@@ -73,7 +74,7 @@ export default function CartPage() {
               {/* Quantity */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                 <button
-                  onClick={() => setQty(item.id, item.quantity - 1)}
+                  onClick={() => item.quantity <= 1 ? remove(item.id) : setQty(item.id, item.quantity - 1)}
                   style={{ width: 32, height: 32, borderRadius: 8, border: '1.5px solid #e5e7eb', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <Minus size={14} />
@@ -110,7 +111,7 @@ export default function CartPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#6b7280' }}>
-              <span>Subtotal ({items.length} items)</span>
+              <span>Subtotal ({totalQty} {totalQty === 1 ? 'item' : 'items'})</span>
               <span style={{ color: '#1a1a2e', fontWeight: 600 }}>Rs. {subtotal.toLocaleString()}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#6b7280' }}>

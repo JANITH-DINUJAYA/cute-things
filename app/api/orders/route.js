@@ -60,14 +60,6 @@ export async function POST(request) {
     order.id = docRef.id;
 
     // ── Deduct stock for each item ───────────────────────────────────
-    const batch = adminDb.batch();
-    for (const item of items) {
-      const productRef = adminDb.collection('products').doc(item.productId);
-      batch.update(productRef, {
-        stock: adminDb.FieldValue ? adminDb.FieldValue.increment(-item.qty) : 0,
-      });
-    }
-    // Note: FieldValue.increment is accessed differently with Admin SDK v12+
     const { FieldValue } = await import('firebase-admin/firestore');
     const stockBatch = adminDb.batch();
     for (const item of items) {

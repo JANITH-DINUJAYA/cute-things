@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { db } from '@/lib/firebase/client';
-import { collection, query, orderBy, getDocs, doc, updateDoc } from 'firebase/firestore';
 import Link from 'next/link';
-import { Search, ShoppingBag, ChevronRight } from 'lucide-react';
+import { Search, ShoppingBag, ChevronRight, AlertCircle } from 'lucide-react';
 
 const STATUS_OPTIONS = [
   { value: 'pending',            label: 'Pending',            color: '#f57f17', bg: '#fffde7' },
@@ -30,19 +28,24 @@ export default function OrdersPage() {
   const [orders,   setOrders]   = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
   const [search,   setSearch]   = useState('');
   const [filter,   setFilter]   = useState('all');
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const q    = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setOrders(data);
-      setFiltered(data);
+      const res = await fetch('/api/admin/orders');
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch orders');
+      }
+      setOrders(data.orders ?? []);
+      setFiltered(data.orders ?? []);
     } catch (err) {
-      console.error(err);
+      console.error('[load orders]', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -65,11 +68,38 @@ export default function OrdersPage() {
   }, [search, filter, orders]);
 
   async function updateStatus(orderId, newStatus) {
-    await updateDoc(doc(db, 'orders', orderId), {
-      status:    newStatus,
-      updatedAt: new Date(),
-    });
-    load();
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update order status');
+      }
+      // Optimistically update status in state or reload
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId ? { ...o, status: newStatus } : o
+        )
+      );
+    } catch (err) {
+      console.error('[updateStatus]', err);
+      alert(err.message);
+    }
+  }
+
+  if (error) {
+    return (
+      <div className="card" style={{ padding: 24, display: 'flex', alignItems: 'center', gap: 12, color: '#dc2626', background: '#fff5f5' }}>
+        <AlertCircle size={20} />
+        <div>
+          <p style={{ margin: 0, fontWeight: 700 }}>Error loading orders</p>
+          <p style={{ margin: 0, fontSize: 13 }}>{error}</p>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {
@@ -142,7 +172,7 @@ export default function OrdersPage() {
                       </select>
                     </td>
                     <td style={{ padding: '14px 16px', fontSize: 13, color: '#9ca3af', whiteSpace: 'nowrap' }}>
-                      {order.createdAt?.toDate?.()?.toLocaleDateString('en-LK') ?? '—'}
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-LK') : '—'}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       <Link href={`/admin/orders/${order.id}`}
