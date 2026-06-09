@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getRole() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (getRole() == 'admin' || getRole() == 'superadmin');
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && getRole() == 'superadmin';
+    }
+
+    function isStaff() {
+      return isAuthenticated() &&
+        (getRole() == 'staff' || getRole() == 'admin' || getRole() == 'superadmin');
+    }
+
+    function isPermanentAccount() {
+      return resource.data.isPermanent == true;
+    }
+
+    // ── Products ────────────────────────────────────────────────────
+    match /products/{productId} {
+      // Anyone can read active products
+      allow read: if resource == null || resource.data.status == 'active' || isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Categories ──────────────────────────────────────────────────
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Orders ──────────────────────────────────────────────────────
+    // All order operations go through Firebase Admin SDK (server-side).
+    // No client-side access allowed.
+    match /orders/{orderId} {
+      allow read, write: if false;
+    }
+
+    // ── Customers ───────────────────────────────────────────────────
+    match /customers/{customerId} {
+      allow read:   if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // ── Admin User Accounts ─────────────────────────────────────────
+    match /users/{uid} {
+      // Any admin can read user list
+      allow read: if isAdmin();
+
+      // Only superadmin can create new admin accounts
+      allow create: if isSuperAdmin();
+
+      // SuperAdmin can update, BUT cannot remove isPermanent flag from permanent accounts
+      allow update: if isSuperAdmin() &&
+        !(resource.data.isPermanent == true &&
+          request.resource.data.isPermanent == false);
+
+      // SuperAdmin can delete ONLY non-permanent accounts
+      allow delete: if isSuperAdmin() && !isPermanentAccount();
+    }
+
+    // ── Settings ────────────────────────────────────────────────────
+    match /settings/{document} {
+      allow read:  if isAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    // ── Inventory Logs ──────────────────────────────────────────────
+    match /inventoryLogs/{logId} {
+      allow read:   if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false; // Logs are immutable
+    }
+
+  }
+}
