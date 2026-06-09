@@ -55,7 +55,8 @@ export default function ProductCard({ product }) {
         {/* Image */}
         <div style={{
           position: 'relative', aspectRatio: '1/1',
-          background: '#f9f0ff', overflow: 'hidden',
+          background: '#faf8f6', overflow: 'hidden',
+          borderBottom: '1px solid rgba(197, 168, 128, 0.08)',
         }}>
           {displayImage ? (
             <Image
@@ -80,10 +81,10 @@ export default function ProductCard({ product }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             opacity: 0, transition: 'opacity .25s',
           }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(197,168,128,.08)'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(197,168,128,.06)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = '0'; e.currentTarget.style.background = 'rgba(197,168,128,.0)'; }}
           >
-            <span className="badge badge-pink" style={{ fontSize: 12, padding: '6px 14px' }}>
+            <span className="badge badge-yellow" style={{ fontSize: 12, padding: '6px 14px', background: '#fff', border: '1px solid #c5a880' }}>
               <Eye size={12} style={{ marginRight: 4 }} /> Quick View
             </span>
           </div>

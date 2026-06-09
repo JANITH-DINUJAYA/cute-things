@@ -10,7 +10,8 @@ const categoryMap = {
 };
 
 export async function generateMetadata({ params }) {
-  const cat = categoryMap[params.category];
+  const resolvedParams = await params;
+  const cat = categoryMap[resolvedParams.category];
   return {
     title: cat ? `${cat.name} — Cute Things` : 'Shop by Category',
     description: `Shop cute ${cat?.name ?? 'products'} in Sri Lanka. Island-wide delivery.`,
@@ -37,7 +38,8 @@ export async function generateStaticParams() {
 }
 
 export default async function CategoryPage({ params }) {
-  const slug     = params.category;
+  const resolvedParams = await params;
+  const slug     = resolvedParams.category;
   const catInfo  = categoryMap[slug];
   const products = await getProducts({ categorySlug: slug });
 

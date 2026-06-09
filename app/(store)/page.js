@@ -11,10 +11,10 @@ export const metadata = {
 export const revalidate = 60;
 
 const categories = [
-  { name: 'Plush Toys',  slug: 'plush-toys',    emoji: '🧸', desc: 'Teddy bears & anime plushies',     bg: 'linear-gradient(135deg,#ff6b9d,#c44dff)' },
-  { name: 'Accessories', slug: 'accessories',    emoji: '🔑', desc: 'Keychains, stickers & more',       bg: 'linear-gradient(135deg,#4facfe,#00f2fe)' },
-  { name: 'Gifts',       slug: 'gifts',          emoji: '🎁', desc: 'Perfect for any occasion',         bg: 'linear-gradient(135deg,#f093fb,#f5576c)' },
-  { name: 'Anime',       slug: 'anime-plushies', emoji: '⭐', desc: 'Your fav characters as plushies',  bg: 'linear-gradient(135deg,#ffecd2,#fcb69f)' },
+  { name: 'Plush Toys',  slug: 'plush-toys',    emoji: '🧸', desc: 'Teddy bears & anime plushies' },
+  { name: 'Accessories', slug: 'accessories',    emoji: '🔑', desc: 'Keychains, stickers & more' },
+  { name: 'Gifts',       slug: 'gifts',          emoji: '🎁', desc: 'Perfect for any occasion' },
+  { name: 'Anime',       slug: 'anime-plushies', emoji: '⭐', desc: 'Your fav characters as plushies' },
 ];
 
 const features = [
@@ -115,15 +115,16 @@ export default async function HomePage() {
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:20 }}>
             {categories.map((cat) => (
               <Link key={cat.slug} href={`/shop/${cat.slug}`} style={{ textDecoration:'none' }}>
-                <div style={{
-                  borderRadius:20, padding:'32px 24px',
-                  background: cat.bg, textAlign:'center', cursor:'pointer',
-                  boxShadow:'0 4px 20px rgba(0,0,0,.08)',
-                  transition:'all 0.2s', transform:'translateY(0)',
-                }}>
-                  <div style={{ fontSize:48, marginBottom:16 }}>{cat.emoji}</div>
-                  <h3 style={{ fontSize:18, fontWeight:700, color:'#fff', margin:'0 0 8px' }}>{cat.name}</h3>
-                  <p style={{ fontSize:13, color:'rgba(255,255,255,.8)', margin:0 }}>{cat.desc}</p>
+                <div className="category-card">
+                  <div style={{ 
+                    fontSize:52, marginBottom:18,
+                    filter: 'drop-shadow(0 4px 10px rgba(197, 168, 128, 0.15))'
+                  }}>{cat.emoji}</div>
+                  <h3 style={{ 
+                    fontSize:20, fontWeight:400, color:'#1e1a1d', margin:'0 0 8px',
+                    fontFamily: 'var(--font-serif)', letterSpacing: '0.02em'
+                  }}>{cat.name}</h3>
+                  <p style={{ fontSize:13, color:'rgba(30,26,29,.6)', margin:0 }}>{cat.desc}</p>
                 </div>
               </Link>
             ))}

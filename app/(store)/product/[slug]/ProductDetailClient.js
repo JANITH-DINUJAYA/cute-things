@@ -59,7 +59,7 @@ export default function ProductDetailClient({ product }) {
         <span>/</span>
         <Link href="/shop" style={{ color: '#6b7280', textDecoration: 'none' }}>Shop</Link>
         <span>/</span>
-        <span style={{ color: '#e91e8c', fontWeight: 600 }}>{name}</span>
+        <span style={{ color: '#c89595', fontWeight: 600 }}>{name}</span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
@@ -69,9 +69,10 @@ export default function ProductDetailClient({ product }) {
           {/* Main image */}
           <div style={{
             borderRadius: 20, overflow: 'hidden',
-            background: '#f9f0ff', aspectRatio: '1/1',
+            background: '#faf8f6', aspectRatio: '1/1',
             position: 'relative', marginBottom: 12,
-            boxShadow: '0 4px 24px rgba(233,30,140,.08)',
+            boxShadow: '0 4px 24px rgba(197,168,128,.12)',
+            border: '1px solid rgba(197,168,128,.15)',
           }}>
             {images[imgIdx] ? (
               <Image src={images[imgIdx]} alt={name} fill
@@ -91,8 +92,8 @@ export default function ProductDetailClient({ product }) {
                 <button key={i} onClick={() => setImgIdx(i)}
                   style={{
                     width: 68, height: 68, borderRadius: 10, overflow: 'hidden',
-                    border: `2px solid ${i === imgIdx ? '#e91e8c' : '#e5e7eb'}`,
-                    cursor: 'pointer', background: '#f9f0ff', padding: 0,
+                    border: `2px solid ${i === imgIdx ? '#c5a880' : '#e5e7eb'}`,
+                    cursor: 'pointer', background: '#faf8f6', padding: 0,
                     transition: 'border-color .2s',
                   }}>
                   <Image src={img} alt={`${name} ${i + 1}`} width={68} height={68} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
@@ -104,11 +105,11 @@ export default function ProductDetailClient({ product }) {
 
         {/* Details */}
         <div>
-          <h1 style={{ fontSize: 'clamp(22px,3vw,32px)', fontWeight: 800, color: '#1a1a2e', margin: '0 0 12px', lineHeight: 1.3 }}>{name}</h1>
+          <h1 style={{ fontSize: 'clamp(22px,3vw,32px)', fontWeight: 800, color: '#1e1a1d', fontFamily: 'var(--font-serif)', margin: '0 0 12px', lineHeight: 1.3 }}>{name}</h1>
 
           {/* Price */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <span style={{ fontSize: 30, fontWeight: 900, color: '#e91e8c' }}>Rs. {displayPrice.toLocaleString()}</span>
+            <span style={{ fontSize: 30, fontWeight: 700, color: '#c89595', fontFamily: 'var(--font-serif)' }}>Rs. {displayPrice.toLocaleString()}</span>
             {discountPrice && (
               <>
                 <span style={{ fontSize: 18, color: '#9ca3af', textDecoration: 'line-through' }}>Rs. {price.toLocaleString()}</span>

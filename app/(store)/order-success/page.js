@@ -3,8 +3,9 @@ import { CheckCircle, ShoppingBag, Home } from 'lucide-react';
 
 export const metadata = { title: 'Order Confirmed! — Cute Things' };
 
-export default function OrderSuccessPage({ searchParams }) {
-  const orderNumber = searchParams?.order ?? '';
+export default async function OrderSuccessPage({ searchParams }) {
+  const resolvedSearchParams = await searchParams;
+  const orderNumber = resolvedSearchParams?.order ?? '';
 
   return (
     <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>

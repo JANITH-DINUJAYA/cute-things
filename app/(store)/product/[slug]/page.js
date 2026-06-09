@@ -5,7 +5,8 @@ import ProductDetailClient from './ProductDetailClient';
 export const revalidate = 30;
 
 export async function generateMetadata({ params }) {
-  const product = await getProductBySlug(params.slug);
+  const resolvedParams = await params;
+  const product = await getProductBySlug(resolvedParams.slug);
   if (!product) return { title: 'Product Not Found' };
   return {
     title: product.name,
@@ -19,7 +20,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductDetailPage({ params }) {
-  const product = await getProductBySlug(params.slug);
+  const resolvedParams = await params;
+  const product = await getProductBySlug(resolvedParams.slug);
   if (!product) notFound();
 
   const jsonLd = {
