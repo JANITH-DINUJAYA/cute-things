@@ -36,6 +36,9 @@ export async function POST(request) {
     }
 
     const uid = decoded.uid;
+    if (!uid) {
+      return NextResponse.json({ error: 'Invalid user session payload: missing UID' }, { status: 401 });
+    }
 
     // 2. Check the role — it can be in decoded directly (custom claim)
     //    or we fall back to Firestore if token hasn't refreshed yet
