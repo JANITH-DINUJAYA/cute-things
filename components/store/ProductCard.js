@@ -52,11 +52,12 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        {/* Image */}
+        {/* Image container — touch-action prevents scroll jank */}
         <div style={{
           position: 'relative', aspectRatio: '1/1',
           background: '#faf8f6', overflow: 'hidden',
           borderBottom: '1px solid rgba(197, 168, 128, 0.08)',
+          touchAction: 'pan-y',
         }}>
           {displayImage ? (
             <Image
@@ -64,9 +65,8 @@ export default function ProductCard({ product }) {
               alt={name}
               fill
               sizes="(max-width:768px) 50vw, 25vw"
-              style={{ objectFit: 'cover', transition: 'transform .4s ease' }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.06)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+              className="product-card-img"
+              style={{ objectFit: 'cover' }}
             />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 48 }}>
@@ -74,17 +74,13 @@ export default function ProductCard({ product }) {
             </div>
           )}
 
-          {/* Hover overlay */}
-          <div style={{
+          {/* Hover overlay — CSS-only, no JS handlers */}
+          <div className="product-card-overlay" style={{
             position: 'absolute', inset: 0,
-            background: 'rgba(197,168,128,.0)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            opacity: 0, transition: 'opacity .25s',
-          }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(197,168,128,.06)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0'; e.currentTarget.style.background = 'rgba(197,168,128,.0)'; }}
-          >
-            <span className="badge badge-yellow" style={{ fontSize: 12, padding: '6px 14px', background: '#fff', border: '1px solid #c5a880' }}>
+            pointerEvents: 'none',
+          }}>
+            <span className="badge badge-yellow" style={{ fontSize: 12, padding: '6px 14px', background: '#fff', border: '1px solid #c5a880', pointerEvents: 'none' }}>
               <Eye size={12} style={{ marginRight: 4 }} /> Quick View
             </span>
           </div>
