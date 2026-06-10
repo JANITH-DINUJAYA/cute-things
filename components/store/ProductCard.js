@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link  from 'next/link';
-import { ShoppingCart, Heart, Star, Eye } from 'lucide-react';
+import { ShoppingCart, Eye } from 'lucide-react';
 import useCartStore from '@/store/cartStore';
 import { useState } from 'react';
 
@@ -42,13 +42,13 @@ export default function ProductCard({ product }) {
         {/* Badges */}
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 2, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {isFeatured && (
-            <span className="badge badge-pink" style={{ fontSize: 11 }}>⭐ Featured</span>
+            <span className="badge badge-pink product-card-badge" style={{ fontSize: 11 }}>⭐ Featured</span>
           )}
           {savings > 0 && (
-            <span className="badge badge-green" style={{ fontSize: 11 }}>-{savings}%</span>
+            <span className="badge badge-green product-card-badge" style={{ fontSize: 11 }}>-{savings}%</span>
           )}
           {isOutOfStock && (
-            <span className="badge badge-gray" style={{ fontSize: 11 }}>Out of Stock</span>
+            <span className="badge badge-gray product-card-badge" style={{ fontSize: 11 }}>Out of Stock</span>
           )}
         </div>
 
@@ -91,15 +91,15 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Info */}
-        <div style={{ padding: '14px 16px 16px' }}>
-          <h3 style={{ fontSize: 14, fontWeight: 500, color: '#1e1a1d', margin: '0 0 8px', lineHeight: 1.4,
+        <div className="product-card-info" style={{ padding: '14px 16px 16px' }}>
+          <h3 className="product-card-title" style={{ fontSize: 14, fontWeight: 500, color: '#1e1a1d', margin: '0 0 8px', lineHeight: 1.4,
             display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {name}
           </h3>
 
           {/* Price */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span style={{ fontSize: 16, fontWeight: 600, color: '#1e1a1d' }}>
+            <span className="product-card-price" style={{ fontSize: 16, fontWeight: 600, color: '#1e1a1d' }}>
               Rs. {(discountPrice ?? price).toLocaleString()}
             </span>
             {discountPrice && (
@@ -114,7 +114,7 @@ export default function ProductCard({ product }) {
             id={`add-to-cart-${id}`}
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="btn-primary"
+            className="btn-primary product-card-btn"
             style={{
               width: '100%', padding: '10px', fontSize: 13,
               opacity: isOutOfStock ? 0.5 : 1,

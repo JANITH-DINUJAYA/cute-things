@@ -56,7 +56,7 @@ export default async function ShopPage() {
 
         {/* Grid */}
         {products.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 24 }}>
+          <div className="product-grid">
             {products.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         ) : (

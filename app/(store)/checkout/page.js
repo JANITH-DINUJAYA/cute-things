@@ -5,17 +5,46 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import useCartStore from '@/store/cartStore';
-import { ArrowLeft, CheckCircle, Truck, User, Phone, MapPin, FileText, AlertCircle } from 'lucide-react';
-
-const SHIPPING_FEE = 350;
+import useSettingsStore from '@/store/settingsStore';
+import { ArrowLeft, CheckCircle, Truck, User, Phone, MapPin, FileText, AlertCircle, Tag } from 'lucide-react';
 
 export default function CheckoutPage() {
   const router   = useRouter();
   const items    = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clearCart);
 
+  const shippingSettings = useSettingsStore((s) => s.shipping);
+  const defaultFee = shippingSettings?.defaultFee ?? 350;
+  const freeShippingThreshold = shippingSettings?.freeShippingThreshold ?? 5000;
+
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('appliedCoupon');
+      if (saved) {
+        setAppliedCoupon(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Error reading appliedCoupon from sessionStorage', e);
+    }
+  }, []);
+
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total    = subtotal + SHIPPING_FEE;
+
+  // Calculate discount
+  let discount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === 'percentage') {
+      discount = Math.round((subtotal * appliedCoupon.value) / 100);
+    } else {
+      discount = Math.min(appliedCoupon.value, subtotal);
+    }
+  }
+
+  // Calculate dynamic shipping fee
+  const shippingFee = (freeShippingThreshold && subtotal >= freeShippingThreshold) ? 0 : defaultFee;
+  const total = Math.max(0, subtotal - discount) + shippingFee;
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
@@ -28,7 +57,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     window.fbq?.('track', 'InitiateCheckout', { value: total, currency: 'LKR', num_items: items.length });
     window.ttq?.track('InitiateCheckout', { value: total, currency: 'LKR' });
-  }, []);
+  }, [total, items.length]);
 
   if (items.length === 0) {
     return (
@@ -59,7 +88,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           customer:    form,
           items:       items.map((i) => ({ productId: i.id, name: i.name, price: i.price, qty: i.quantity, image: i.image })),
-          shippingFee: SHIPPING_FEE,
+          couponCode:  appliedCoupon?.code || null,
         }),
       });
       const data = await res.json();
@@ -69,6 +98,7 @@ export default function CheckoutPage() {
       window.fbq?.('track', 'Purchase', { value: total, currency: 'LKR', content_ids: items.map((i) => i.id) });
       window.ttq?.track('CompletePayment', { value: total, currency: 'LKR' });
 
+      sessionStorage.removeItem('appliedCoupon');
       clearCart();
       router.push(`/order-success?order=${data.orderNumber}`);
     } catch (err) {
@@ -104,7 +134,7 @@ export default function CheckoutPage() {
       </h1>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 32, alignItems: 'start' }}>
+        <div className="checkout-layout">
 
           {/* Customer form */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -121,7 +151,7 @@ export default function CheckoutPage() {
               <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <User size={18} color="#e91e8c" /> Personal Information
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="checkout-form-grid">
                 <Field label="Full Name"     name="name"  placeholder="Eg: Janith Perera" required />
                 <Field label="Phone Number"  name="phone" placeholder="07X XXX XXXX"       required type="tel" />
               </div>
@@ -137,7 +167,7 @@ export default function CheckoutPage() {
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <Field label="Street Address" name="address"    placeholder="No. 123, Main Street, Colombo 07" required />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="checkout-form-grid">
                   <Field label="City"        name="city"        placeholder="Colombo"  required />
                   <Field label="Postal Code" name="postalCode"  placeholder="00700"   />
                 </div>
@@ -168,7 +198,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order summary */}
-          <div className="card" style={{ padding: 28, position: 'sticky', top: 88 }}>
+          <div className="card checkout-summary-card" style={{ padding: 28 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>Your Order</h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
@@ -195,8 +225,17 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#6b7280' }}>
                 <span>Subtotal</span><span style={{ color: '#1a1a2e', fontWeight: 600 }}>Rs. {subtotal.toLocaleString()}</span>
               </div>
+              {discount > 0 && appliedCoupon && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#10b981' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Tag size={12} /> Discount ({appliedCoupon.code})</span>
+                  <span style={{ fontWeight: 600 }}>- Rs. {discount.toLocaleString()}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#6b7280' }}>
-                <span>Shipping</span><span style={{ color: '#1a1a2e', fontWeight: 600 }}>Rs. {SHIPPING_FEE.toLocaleString()}</span>
+                <span>Shipping</span>
+                <span style={{ color: shippingFee === 0 ? '#10b981' : '#1a1a2e', fontWeight: 600 }}>
+                  {shippingFee === 0 ? 'FREE' : `Rs. ${shippingFee.toLocaleString()}`}
+                </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, fontWeight: 800, borderTop: '1.5px solid #f0f0f0', paddingTop: 12, marginTop: 4 }}>
                 <span>Total</span><span style={{ color: '#e91e8c' }}>Rs. {total.toLocaleString()}</span>
@@ -221,10 +260,31 @@ export default function CheckoutPage() {
       </form>
 
       <style>{`
+        .checkout-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 340px;
+          gap: 32px;
+          align-items: start;
+        }
+        .checkout-form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+        .checkout-summary-card {
+          position: sticky;
+          top: 88px;
+        }
         @media (max-width: 768px) {
-          div[style*="grid-template-columns: minmax"] { grid-template-columns: 1fr !important; }
-          div[style*="position: sticky"] { position: static !important; }
-          div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+          .checkout-layout {
+            grid-template-columns: 1fr !important;
+          }
+          .checkout-summary-card {
+            position: static !important;
+          }
+          .checkout-form-grid {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>

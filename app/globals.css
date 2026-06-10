@@ -239,3 +239,67 @@ h1, h2, h3, h4, h5, h6, .font-serif {
   border-color: rgba(197, 168, 128, 0.4);
   box-shadow: 0 20px 40px rgba(197, 168, 128, 0.12);
 }
+
+/* ── Storefront Mobile Layout Polish ──────────────────────────────────────── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .product-card-info {
+    padding: 10px 12px 12px !important;
+  }
+  .product-card-title {
+    font-size: 13px !important;
+    margin-bottom: 6px !important;
+  }
+  .product-card-price {
+    font-size: 14px !important;
+  }
+  .product-card-btn {
+    font-size: 12px !important;
+    padding: 8px !important;
+  }
+  .product-card-badge {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+  }
+}
+
+.pdp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .pdp-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .pdp-buttons-container {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .pdp-buttons-container a, .pdp-buttons-container button {
+    width: 100% !important;
+    flex: none !important;
+    text-align: center !important;
+  }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.mobile-menu-drawer {
+  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

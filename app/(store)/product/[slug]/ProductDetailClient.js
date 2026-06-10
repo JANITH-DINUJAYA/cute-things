@@ -3,22 +3,8 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { db } from '@/lib/firebase/client';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import useCartStore from '@/store/cartStore';
-import { ShoppingCart, ArrowLeft, Check, Minus, Plus, Share2, Heart } from 'lucide-react';
-import { notFound } from 'next/navigation';
-
-async function getProduct(slug) {
-  const q = query(
-    collection(db, 'products'),
-    where('slug', '==', slug),
-    limit(1)
-  );
-  const snap = await getDocs(q);
-  if (snap.empty) return null;
-  return { id: snap.docs[0].id, ...snap.docs[0].data() };
-}
+import { ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 
 export default function ProductDetailClient({ product }) {
   const addItem = useCartStore((s) => s.addItem);
@@ -62,7 +48,7 @@ export default function ProductDetailClient({ product }) {
         <span style={{ color: '#c89595', fontWeight: 600 }}>{name}</span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
+      <div className="pdp-grid">
 
         {/* Images */}
         <div>
@@ -157,7 +143,7 @@ export default function ProductDetailClient({ product }) {
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
+          <div className="pdp-buttons-container" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
             <button
               id={`pdp-add-to-cart-${id}`}
               onClick={handleAddToCart}
@@ -189,12 +175,6 @@ export default function ProductDetailClient({ product }) {
           </div>
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </div>
   );
 }

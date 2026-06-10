@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import useCartStore from '@/store/cartStore';
+import useSettingsStore from '@/store/settingsStore';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
 export default function CartPage() {
@@ -14,6 +15,12 @@ export default function CartPage() {
   const setQty  = useCartStore((s) => s.setQuantity);
   const subtotal   = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
   const totalQty   = items.reduce((s, i) => s + i.quantity, 0);
+
+  const shippingSettings = useSettingsStore((s) => s.shipping);
+  const defaultFee = shippingSettings?.defaultFee ?? 350;
+  const freeShippingThreshold = shippingSettings?.freeShippingThreshold ?? 5000;
+
+  const freeShippingTarget = freeShippingThreshold ? Math.max(0, freeShippingThreshold - subtotal) : 0;
 
   // Coupon state
   const [couponInput, setCouponInput] = useState('');
@@ -100,14 +107,14 @@ export default function CartPage() {
         Shopping Cart <span className="gradient-brand-text">({totalQty} {totalQty === 1 ? 'item' : 'items'})</span>
       </h1>
 
-      <div className="cart-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 32, alignItems: 'start' }}>
+      <div className="cart-layout">
 
         {/* Items */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {items.map((item) => (
-            <div key={item.id} className="card" style={{ display: 'flex', gap: 16, padding: 20, alignItems: 'center' }}>
+            <div key={item.id} className="card cart-item-card">
               {/* Image */}
-              <div style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', background: '#f9f0ff', flexShrink: 0 }}>
+              <div className="cart-item-image-wrapper">
                 {item.image ? (
                   <Image src={item.image} alt={item.name} width={80} height={80} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                 ) : (
@@ -116,7 +123,7 @@ export default function CartPage() {
               </div>
 
               {/* Details */}
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="cart-item-details">
                 <Link href={`/product/${item.slug}`} style={{ textDecoration: 'none' }}>
                   <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1a1a2e', marginBottom: 4,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</h3>
@@ -127,7 +134,7 @@ export default function CartPage() {
               </div>
 
               {/* Quantity */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <div className="cart-item-quantity">
                 <button
                   onClick={() => item.quantity <= 1 ? remove(item.id) : setQty(item.id, item.quantity - 1)}
                   style={{ width: 32, height: 32, borderRadius: 8, border: '1.5px solid #e5e7eb', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -144,7 +151,7 @@ export default function CartPage() {
               </div>
 
               {/* Subtotal & Remove */}
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div className="cart-item-totals">
                 <p style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e', marginBottom: 8 }}>
                   Rs. {(item.price * item.quantity).toLocaleString()}
                 </p>
@@ -161,8 +168,28 @@ export default function CartPage() {
         </div>
 
         {/* Order Summary */}
-        <div className="card" style={{ padding: 28, position: 'sticky', top: 88 }}>
+        <div className="card cart-summary-card" style={{ padding: 28 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 24 }}>Order Summary</h2>
+
+          {/* Free Shipping Indicator */}
+          {freeShippingThreshold && (
+            <div style={{
+              background: freeShippingTarget > 0 ? 'rgba(197, 168, 128, 0.08)' : '#ecfdf5',
+              border: `1px solid ${freeShippingTarget > 0 ? 'rgba(197, 168, 128, 0.2)' : '#a7f3d0'}`,
+              borderRadius: 10,
+              padding: '10px 14px',
+              fontSize: 13,
+              marginBottom: 20,
+              color: freeShippingTarget > 0 ? '#1e1a1d' : '#065f46',
+              fontWeight: 500,
+            }}>
+              {freeShippingTarget > 0 ? (
+                <>🎉 Add <strong style={{ color: '#e91e8c' }}>Rs. {freeShippingTarget.toLocaleString()}</strong> more to get <strong>FREE shipping</strong>!</>
+              ) : (
+                <>🎉 You qualify for <strong>FREE shipping</strong>!</>
+              )}
+            </div>
+          )}
 
           {/* Coupon Code Input */}
           <div style={{ marginBottom: 20 }}>
@@ -236,7 +263,9 @@ export default function CartPage() {
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#6b7280' }}>
               <span>Shipping</span>
-              <span style={{ color: '#10b981', fontWeight: 600 }}>Calculated at checkout</span>
+              <span style={{ color: freeShippingTarget === 0 ? '#10b981' : '#1a1a2e', fontWeight: 600 }}>
+                {freeShippingTarget === 0 ? 'FREE' : `Rs. ${defaultFee.toLocaleString()}`}
+              </span>
             </div>
           </div>
 
@@ -264,9 +293,92 @@ export default function CartPage() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .cart-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 340px;
+          gap: 32px;
+          align-items: start;
+        }
+
+        .cart-item-card {
+          display: flex;
+          gap: 16px;
+          padding: 20px;
+          align-items: center;
+        }
+
+        .cart-item-image-wrapper {
+          width: 80px;
+          height: 80px;
+          border-radius: 12px;
+          overflow: hidden;
+          background: #f9f0ff;
+          flex-shrink: 0;
+        }
+
+        .cart-item-details {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .cart-item-quantity {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        .cart-item-totals {
+          text-align: right;
+          flex-shrink: 0;
+        }
+
+        .cart-summary-card {
+          position: sticky;
+          top: 88px;
+        }
+
         @media (max-width: 768px) {
-          .cart-layout { grid-template-columns: 1fr !important; }
-          div[style*="position: sticky"] { position: static !important; }
+          .cart-layout {
+            grid-template-columns: 1fr !important;
+          }
+          .cart-summary-card {
+            position: static !important;
+          }
+          .cart-item-card {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+            padding: 16px !important;
+          }
+          .cart-item-image-wrapper {
+            width: 64px !important;
+            height: 64px !important;
+          }
+          .cart-item-details {
+            width: 100% !important;
+          }
+          .cart-item-quantity {
+            width: 100% !important;
+            justify-content: flex-start !important;
+            margin-top: 4px;
+          }
+          .cart-item-totals {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            border-top: 1px dashed #eae3dc;
+            padding-top: 10px;
+            margin-top: 4px;
+          }
+          .cart-item-totals p {
+            margin: 0 !important;
+          }
+          .cart-item-totals button {
+            margin-left: 0 !important;
+          }
         }
       `}</style>
     </div>

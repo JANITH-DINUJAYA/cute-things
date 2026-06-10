@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ShoppingCart, Menu, X, Search } from 'lucide-react';
 import useCartStore from '@/store/cartStore';
+import useSettingsStore from '@/store/settingsStore';
 import { STORE_NAV_LINKS } from '@/lib/constants';
 
 export default function Navbar() {
@@ -13,6 +14,7 @@ export default function Navbar() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
   const itemCount = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0));
+  const siteName = useSettingsStore((s) => s.general.siteName) || 'Cute Things';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -45,7 +47,7 @@ export default function Navbar() {
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', flex: 1 }}>
             <Image
               src="/logo.jpg"
-              alt="Cute Things Logo"
+              alt={`${siteName} Logo`}
               width={42}
               height={42}
               style={{
@@ -60,7 +62,7 @@ export default function Navbar() {
               textTransform: 'uppercase',
               fontFamily: 'var(--font-serif)',
               color: '#1e1a1d',
-            }}>Cute Things</span>
+            }}>{siteName}</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -142,7 +144,7 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.3)', backdropFilter: 'blur(4px)' }}
           />
-          <nav style={{
+          <nav className="mobile-menu-drawer" style={{
             position: 'absolute', top: 68, left: 0, right: 0,
             background: '#fff',
             borderBottom: '1px solid #f0f0f0',

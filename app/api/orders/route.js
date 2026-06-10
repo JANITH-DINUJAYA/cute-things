@@ -17,7 +17,7 @@ import { sendOrderConfirmation, sendAdminNewOrderAlert } from '@/lib/email';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { customer, items, shippingFee = 0 } = body;
+    const { customer, items, couponCode } = body;
 
     // ── Basic validation ─────────────────────────────────────────────
     if (!customer?.name || !customer?.email || !customer?.phone) {
@@ -27,19 +27,51 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Order must contain at least one item' }, { status: 400 });
     }
 
+    // ── Fetch shipping & coupon settings from Firestore ──────────────
+    const [shippingSnap, couponsSnap] = await Promise.all([
+      adminDb.collection('settings').doc('shipping').get(),
+      adminDb.collection('settings').doc('coupons').get(),
+    ]);
+
+    const shippingSettings = shippingSnap.exists ? shippingSnap.data() : { defaultFee: 350, freeShippingThreshold: 5000 };
+    const defaultFee = shippingSettings.defaultFee ?? 350;
+    const freeShippingThreshold = shippingSettings.freeShippingThreshold ?? 5000;
+
+    const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+    // Calculate dynamic shipping fee
+    const actualShippingFee = (freeShippingThreshold && subtotal >= freeShippingThreshold) ? 0 : defaultFee;
+
+    // Calculate discount
+    let discount = 0;
+    if (couponCode) {
+      const { list = [] } = couponsSnap.exists ? couponsSnap.data() : {};
+      const coupon = list.find(
+        (c) => c.code === couponCode.toUpperCase().trim() && c.active !== false
+      );
+      if (coupon && (!coupon.expiry || new Date(coupon.expiry) >= new Date())) {
+        if (coupon.type === 'percentage') {
+          discount = Math.round((subtotal * coupon.value) / 100);
+        } else {
+          discount = Math.min(coupon.value, subtotal);
+        }
+      }
+    }
+
+    const total = Math.max(0, subtotal - discount) + actualShippingFee;
+
     // ── Generate order number ────────────────────────────────────────
     const timestamp  = Date.now();
     const orderNumber = `CT-${timestamp.toString().slice(-8)}`;
-
-    const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const total    = subtotal + shippingFee;
 
     const order = {
       orderNumber,
       customer,
       items,
       subtotal,
-      shippingFee,
+      discount,
+      couponCode: couponCode || null,
+      shippingFee: actualShippingFee,
       total,
       paymentMethod:  'cod',
       status:         'pending',

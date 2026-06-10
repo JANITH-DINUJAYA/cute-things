@@ -2,11 +2,25 @@
 
 import { useState } from 'react';
 import { Mail, Phone, Facebook, Music2, Send, CheckCircle } from 'lucide-react';
+import useSettingsStore from '@/store/settingsStore';
 
 export default function ContactPage() {
   const [form, setForm]       = useState({ name: '', email: '', message: '' });
   const [sent, setSent]       = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const general = useSettingsStore((s) => s.general);
+  const contactEmail = general.contactEmail || 'hello@cutethings.lk';
+  const facebookUrl = general.facebookUrl || 'https://www.facebook.com/share/17Qros4sRV/';
+  const tiktokUrl = general.tiktokUrl || 'https://www.tiktok.com/@cute.things516';
+  const phone = general.phone;
+
+  const contactMethods = [
+    facebookUrl && { icon: Facebook, label: 'Facebook', value: 'Message Us', href: facebookUrl, color: '#1877f2' },
+    tiktokUrl && { icon: Music2,   label: 'TikTok',   value: 'Follow Us', href: tiktokUrl, color: '#000' },
+    contactEmail && { icon: Mail,     label: 'Email',    value: contactEmail, href: `mailto:${contactEmail}`, color: '#e91e8c' },
+    phone && { icon: Phone,    label: 'Phone',    value: phone, href: `tel:${phone}`, color: '#10b981' }
+  ].filter(Boolean);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -31,11 +45,7 @@ export default function ContactPage() {
         {/* Contact Info */}
         <div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
-            {[
-              { icon: Facebook, label: 'Facebook', value: 'Cute Things', href: 'https://www.facebook.com/share/17Qros4sRV/', color: '#1877f2' },
-              { icon: Music2,   label: 'TikTok',   value: '@cute.things516', href: 'https://www.tiktok.com/@cute.things516', color: '#000' },
-              { icon: Mail,     label: 'Email',    value: 'hello@cutethings.lk', href: 'mailto:hello@cutethings.lk', color: '#e91e8c' },
-            ].map(({ icon: Icon, label, value, href, color }) => (
+            {contactMethods.map(({ icon: Icon, label, value, href, color }) => (
               <a key={label} href={href} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 16, textDecoration: 'none', padding: '16px 20px', background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 14, transition: 'all .2s' }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Icon size={20} color={color} />

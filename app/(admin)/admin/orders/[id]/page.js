@@ -196,6 +196,12 @@ export default function OrderDetailPage({ params }) {
                 <span style={{ color: '#6b7280' }}>Subtotal</span>
                 <span>Rs. {order.subtotal.toLocaleString()}</span>
               </div>
+              {order.discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#10b981' }}>
+                  <span>Discount ({order.couponCode || 'Coupon'})</span>
+                  <span>- Rs. {order.discount.toLocaleString()}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
                 <span style={{ color: '#6b7280' }}>Shipping Fee</span>
                 <span>Rs. {order.shippingFee.toLocaleString()}</span>
