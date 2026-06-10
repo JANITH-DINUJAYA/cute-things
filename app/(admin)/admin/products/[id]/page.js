@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { db } from '@/lib/firebase/client';
-import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
 import { ArrowLeft, Upload, X, Star, Trash2, Save } from 'lucide-react';
 import Image from 'next/image';
 
@@ -29,6 +29,7 @@ export default function EditProductPage() {
     discountPrice: '', stock: '', weight: '',
     status: 'active', isFeatured: false, categoryId: '',
   });
+  const [categories, setCategories] = useState([]);
   const [images,    setImages]    = useState([]);
   const [uploading, setUploading] = useState(false);
   const [saving,    setSaving]    = useState(false);
@@ -36,6 +37,20 @@ export default function EditProductPage() {
   const [confirmDel, setConfirmDel] = useState(false);
   const [error,     setError]     = useState('');
   const [loading,   setLoading]   = useState(true);
+
+  // ── Load categories ──────────────────────────────────────────────────
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const snap = await getDocs(collection(db, 'categories'));
+        const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setCategories(list);
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    }
+    loadCategories();
+  }, []);
 
   // ── Load existing product ────────────────────────────────────────────
   const load = useCallback(async () => {
@@ -110,6 +125,9 @@ export default function EditProductPage() {
     }
     setSaving(true);
     try {
+      const selectedCat = categories.find((c) => c.id === form.categoryId);
+      const categorySlug = selectedCat ? selectedCat.slug : '';
+
       await updateDoc(doc(db, 'products', id), {
         name:          form.name.trim(),
         slug:          slugify(form.name),
@@ -123,6 +141,8 @@ export default function EditProductPage() {
         isFeatured:    form.isFeatured,
         images,
         categoryId:    form.categoryId || '',
+        category:      categorySlug,
+        categorySlug:  categorySlug,
         updatedAt:     serverTimestamp(),
       });
       router.push('/admin/products');
@@ -261,10 +281,19 @@ export default function EditProductPage() {
         {/* Settings */}
         <div className="card" style={{ padding: 24 }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 20 }}>Settings</h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center' }}>
+          <div className="settings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Category</label>
+              <select name="categoryId" value={form.categoryId} onChange={handleChange} className="input">
+                <option value="">Select Category...</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Status</label>
-              <select name="status" value={form.status} onChange={handleChange} className="input" style={{ width: 'auto' }}>
+              <select name="status" value={form.status} onChange={handleChange} className="input">
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="out_of_stock">Out of Stock</option>
@@ -316,6 +345,7 @@ export default function EditProductPage() {
         @media(max-width:640px){
           div[style*="grid-template-columns: 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important}
           div[style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}
+          .settings-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>
