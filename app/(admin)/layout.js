@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { auth, db } from '@/lib/firebase/client';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -13,6 +13,7 @@ export default function AdminLayout({ children }) {
   const router   = useRouter();
   const pathname = usePathname();
   const { setUser, setAdminUser, setLoading, clearAuth, loading } = useAuthStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -35,6 +36,11 @@ export default function AdminLayout({ children }) {
     return () => unsub();
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -51,10 +57,13 @@ export default function AdminLayout({ children }) {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>
-      <AdminSidebar />
+      <AdminSidebar
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+      />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <AdminTopbar />
-        <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+        <AdminTopbar onMenuToggle={() => setMobileMenuOpen((v) => !v)} />
+        <main style={{ flex: 1, padding: '24px 24px', overflowY: 'auto' }}>
           {children}
         </main>
       </div>

@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { db } from '@/lib/firebase/client';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { TrendingUp, Percent, Code, Trash2, Plus, Info, AlertTriangle } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 
@@ -12,8 +10,9 @@ export default function MarketingPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [coupons, setCoupons] = useState([]);
-  
+
   // Coupon inputs
   const [code, setCode] = useState('');
   const [type, setType] = useState('percentage');
@@ -25,21 +24,16 @@ export default function MarketingPage() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
-      // Fetch pixels and coupons
-      const [pixelsSnap, couponsSnap] = await Promise.all([
-        getDoc(doc(db, 'settings', 'pixels')),
-        getDoc(doc(db, 'settings', 'coupons'))
-      ]);
-
-      if (pixelsSnap.exists()) {
-        setPixelIds(pixelsSnap.data());
-      }
-      if (couponsSnap.exists()) {
-        setCoupons(couponsSnap.data().list || []);
-      }
+      const res = await fetch('/api/admin/settings');
+      if (!res.ok) throw new Error('Failed to load marketing data');
+      const data = await res.json();
+      setPixelIds(data.pixels || { metaPixelId: '', tiktokPixelId: '' });
+      setCoupons(data.coupons?.list || []);
     } catch (err) {
       console.error('Failed to load marketing data:', err);
+      setError('Could not load marketing data. Please refresh.');
     } finally {
       setLoading(false);
     }
@@ -49,11 +43,24 @@ export default function MarketingPage() {
     loadData();
   }, [loadData]);
 
+  async function saveCoupons(newList) {
+    const res = await fetch('/api/admin/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tab: 'coupons', data: { list: newList } }),
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.error || 'Failed to save coupons');
+    }
+  }
+
   async function handleAddCoupon(e) {
     e.preventDefault();
     if (!isSuper || !code || !val) return;
 
     setSaving(true);
+    setError('');
     try {
       const newCoupon = {
         code: code.toUpperCase().trim(),
@@ -65,16 +72,16 @@ export default function MarketingPage() {
       };
 
       const newList = [...coupons, newCoupon];
-      await setDoc(doc(db, 'settings', 'coupons'), { list: newList });
+      await saveCoupons(newList);
       setCoupons(newList);
-      
+
       // Reset inputs
       setCode('');
       setVal('');
       setExpiry('');
     } catch (err) {
       console.error('Failed to save coupon:', err);
-      alert('Error: Only SuperAdmin accounts can manage coupons.');
+      setError(err.message || 'Error: Only SuperAdmin accounts can manage coupons.');
     } finally {
       setSaving(false);
     }
@@ -86,11 +93,11 @@ export default function MarketingPage() {
 
     try {
       const newList = coupons.filter((_, i) => i !== index);
-      await setDoc(doc(db, 'settings', 'coupons'), { list: newList });
+      await saveCoupons(newList);
       setCoupons(newList);
     } catch (err) {
       console.error('Failed to delete coupon:', err);
-      alert('Error: Permission Denied.');
+      setError(err.message || 'Error: Permission Denied.');
     }
   }
 
@@ -104,6 +111,12 @@ export default function MarketingPage() {
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: '0.02em', fontFamily: 'var(--font-serif)' }}>Marketing</h2>
           <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>Create discount codes and monitor active social pixels</p>
         </div>
+
+        {error && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', color: '#991b1b', fontSize: 13, marginBottom: 16 }}>
+            <AlertTriangle size={14} /> {error}
+          </div>
+        )}
 
         {/* Coupons List */}
         <div className="card" style={{ padding: 24, marginBottom: 24 }}>
@@ -216,9 +229,9 @@ export default function MarketingPage() {
                 type="submit"
                 disabled={saving}
                 className="btn-primary"
-                style={{ width: '100%', marginTop: 8 }}
+                style={{ width: '100%', marginTop: 8, opacity: saving ? 0.7 : 1 }}
               >
-                <Plus size={16} /> Create Coupon
+                <Plus size={16} /> {saving ? 'Saving…' : 'Create Coupon'}
               </button>
             </form>
           </div>
@@ -262,7 +275,7 @@ export default function MarketingPage() {
 
             <div style={{ borderTop: '1px solid #eae3dc', paddingTop: 14 }}>
               <p style={{ margin: 0, fontSize: 12, color: '#888', lineHeight: 1.5 }}>
-                Configure tracking keys inside <strong>Settings → Tracking Pixels</strong> tab. The storefront fires automated events for content views, cart additions, and checkout page entries.
+                Configure tracking keys inside <strong>Settings → Tracking Pixels</strong> tab.
               </p>
             </div>
           </div>

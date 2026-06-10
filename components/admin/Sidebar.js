@@ -5,10 +5,10 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingBag, Users,
-  Tag, TrendingUp, Shield, Settings, X, ChevronRight,
+  Tag, TrendingUp, Shield, Settings, ChevronRight, X,
 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const iconMap = { LayoutDashboard, Package, ShoppingBag, Users, Tag, TrendingUp, Shield, Settings };
 
@@ -23,10 +23,15 @@ const navItems = [
   { label: 'Settings',   href: '/admin/settings',    icon: 'Settings',        permission: 'manageSettings'  },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ mobileOpen, onMobileClose }) {
   const pathname      = usePathname();
   const { role, permissions, adminUser } = useAuthStore();
   const [collapsed,   setCollapsed] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    onMobileClose?.();
+  }, [pathname]);
 
   function canAccess(permission) {
     if (!permission || role === 'superadmin') return true;
@@ -35,20 +40,8 @@ export default function AdminSidebar() {
 
   const visibleItems = navItems.filter((n) => canAccess(n.permission));
 
-  return (
-    <aside style={{
-      width: collapsed ? 68 : 240,
-      minHeight: '100vh',
-      background: '#0f0f1a',
-      display: 'flex',
-      flexDirection: 'column',
-      flexShrink: 0,
-      transition: 'width .25s ease',
-      overflow: 'hidden',
-      position: 'sticky',
-      top: 0,
-      zIndex: 30,
-    }}>
+  const sidebarContent = (
+    <>
       {/* Logo */}
       <div style={{
         padding: collapsed ? '20px 16px' : '24px 20px',
@@ -63,12 +56,7 @@ export default function AdminSidebar() {
               alt="Logo"
               width={34}
               height={34}
-              style={{
-                borderRadius: 6,
-                objectFit: 'cover',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                marginRight: 4
-              }}
+              style={{ borderRadius: 6, objectFit: 'cover', border: '1px solid rgba(255,255,255,.1)', marginRight: 4 }}
             />
             <div>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#fff' }}>Cute Things</p>
@@ -77,18 +65,26 @@ export default function AdminSidebar() {
           </div>
         )}
         {collapsed && (
-          <Image
-            src="/logo.jpg"
-            alt="Logo"
-            width={28}
-            height={28}
-            style={{ borderRadius: 4, objectFit: 'cover' }}
-          />
+          <Image src="/logo.jpg" alt="Logo" width={28} height={28} style={{ borderRadius: 4, objectFit: 'cover' }} />
         )}
-        <button onClick={() => setCollapsed(!collapsed)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.4)', display: collapsed ? 'none' : 'flex', alignItems: 'center' }}>
+        {/* Desktop collapse button */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="sidebar-collapse-btn"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.4)', display: collapsed ? 'none' : 'flex', alignItems: 'center' }}
+        >
           <ChevronRight size={16} style={{ transform: 'rotate(180deg)' }} />
         </button>
+        {/* Mobile close button */}
+        {mobileOpen !== undefined && (
+          <button
+            onClick={onMobileClose}
+            className="sidebar-mobile-close"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.5)', display: 'flex', alignItems: 'center', padding: 4 }}
+          >
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       {/* Role badge */}
@@ -142,8 +138,8 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      {/* Collapse toggle at bottom */}
-      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
+      {/* Collapse toggle at bottom — desktop only */}
+      <div className="sidebar-collapse-footer" style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
         <button onClick={() => setCollapsed(!collapsed)}
           style={{
             width: '100%', padding: '10px', borderRadius: 10, border: 'none',
@@ -155,6 +151,72 @@ export default function AdminSidebar() {
           {!collapsed && 'Collapse'}
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="admin-sidebar-desktop" style={{
+        width: collapsed ? 68 : 240,
+        minHeight: '100vh',
+        background: '#0f0f1a',
+        display: 'flex',
+        flexDirection: 'column',
+        flexShrink: 0,
+        transition: 'width .25s ease',
+        overflow: 'hidden',
+        position: 'sticky',
+        top: 0,
+        zIndex: 30,
+      }}>
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          onClick={onMobileClose}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,.55)',
+            zIndex: 49,
+          }}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className="admin-sidebar-mobile"
+        style={{
+          position: 'fixed', top: 0, left: 0, bottom: 0,
+          width: 260,
+          background: '#0f0f1a',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 50,
+          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform .25s ease',
+          overflowY: 'auto',
+        }}
+      >
+        {sidebarContent}
+      </aside>
+
+      <style>{`
+        /* On desktop, hide mobile drawer and show desktop sidebar */
+        .admin-sidebar-mobile { display: none !important; }
+        .admin-sidebar-desktop { display: flex !important; }
+        .sidebar-mobile-close { display: none !important; }
+
+        @media (max-width: 768px) {
+          .admin-sidebar-desktop { display: none !important; }
+          .admin-sidebar-mobile { display: flex !important; }
+          .sidebar-collapse-btn { display: none !important; }
+          .sidebar-collapse-footer { display: none !important; }
+          .sidebar-mobile-close { display: flex !important; }
+        }
+      `}</style>
+    </>
   );
 }

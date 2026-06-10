@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { db } from '@/lib/firebase/client';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Settings, Truck, Code, Save, Info, AlertTriangle } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 
@@ -40,19 +38,21 @@ export default function SettingsPage() {
 
   const loadSettings = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
-      const [generalSnap, shippingSnap, pixelsSnap] = await Promise.all([
-        getDoc(doc(db, 'settings', 'general')),
-        getDoc(doc(db, 'settings', 'shipping')),
-        getDoc(doc(db, 'settings', 'pixels'))
-      ]);
+      const res = await fetch('/api/admin/settings');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to load settings');
+      }
+      const data = await res.json();
 
-      if (generalSnap.exists()) setGeneral((g) => ({ ...g, ...generalSnap.data() }));
-      if (shippingSnap.exists()) setShipping((s) => ({ ...s, ...shippingSnap.data() }));
-      if (pixelsSnap.exists()) setPixels((p) => ({ ...p, ...pixelsSnap.data() }));
+      if (data.general  && Object.keys(data.general).length)  setGeneral((g)  => ({ ...g,  ...data.general  }));
+      if (data.shipping && Object.keys(data.shipping).length) setShipping((s) => ({ ...s,  ...data.shipping }));
+      if (data.pixels   && Object.keys(data.pixels).length)   setPixels((p)   => ({ ...p,  ...data.pixels   }));
     } catch (err) {
       console.error('Failed to load settings:', err);
-      setError('Failed to load settings from database.');
+      setError(err.message || 'Failed to load settings from database.');
     } finally {
       setLoading(false);
     }
@@ -71,21 +71,32 @@ export default function SettingsPage() {
     setError('');
 
     try {
+      let tabData;
       if (activeTab === 'general') {
-        await setDoc(doc(db, 'settings', 'general'), general);
+        tabData = general;
       } else if (activeTab === 'shipping') {
-        await setDoc(doc(db, 'settings', 'shipping'), {
+        tabData = {
           defaultFee: Number(shipping.defaultFee),
           freeShippingThreshold: shipping.freeShippingThreshold ? Number(shipping.freeShippingThreshold) : null
-        });
+        };
       } else if (activeTab === 'pixels') {
-        await setDoc(doc(db, 'settings', 'pixels'), pixels);
+        tabData = pixels;
       }
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tab: activeTab, data: tabData }),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to save');
+
       setSuccess('Settings saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error('Failed to save settings:', err);
-      setError('Permission Denied or Connection Error. Only SuperAdmin can write settings.');
+      setError(err.message || 'Permission Denied or Connection Error.');
     } finally {
       setSaving(false);
     }
@@ -104,16 +115,16 @@ export default function SettingsPage() {
       {!isSuper && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '12px 16px', color: '#b45309', fontSize: 13, marginBottom: 24 }}>
           <AlertTriangle size={16} />
-          <span>You are logged in as an Admin/Staff. Only the **SuperAdmin** has write access to settings documents. Fields are read-only.</span>
+          <span>You are logged in as an Admin/Staff. Only the <strong>SuperAdmin</strong> has write access to settings. Fields are read-only.</span>
         </div>
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #eae3dc', marginBottom: 24, gap: 8 }}>
+      <div style={{ display: 'flex', borderBottom: '1px solid #eae3dc', marginBottom: 24, gap: 4, overflowX: 'auto' }}>
         {[
-          { id: 'general', label: 'General Info', icon: Settings },
-          { id: 'shipping', label: 'Shipping Fees', icon: Truck },
-          { id: 'pixels', label: 'Tracking Pixels', icon: Code }
+          { id: 'general',  label: 'General Info',     icon: Settings },
+          { id: 'shipping', label: 'Shipping Fees',    icon: Truck    },
+          { id: 'pixels',   label: 'Tracking Pixels',  icon: Code     },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -137,7 +148,8 @@ export default function SettingsPage() {
                 fontWeight: isActive ? 600 : 500,
                 fontSize: 14,
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
               }}
             >
               <Icon size={16} />
@@ -185,7 +197,7 @@ export default function SettingsPage() {
                   placeholder="e.g. Adorable Gifts & Plushies"
                 />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }} className="settings-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1e1a1d', marginBottom: 6 }}>Contact Email</label>
                   <input
@@ -220,7 +232,7 @@ export default function SettingsPage() {
                   placeholder="Boutique Office Address..."
                 />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }} className="settings-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1e1a1d', marginBottom: 6 }}>Facebook Page URL</label>
                   <input
@@ -274,7 +286,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1e1a1d', marginBottom: 6 }}>
-                  Free Shipping Threshold (Rs. - Leave empty to disable)
+                  Free Shipping Threshold (Rs. — Leave empty to disable)
                 </label>
                 <input
                   type="number"
@@ -316,7 +328,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Action Button */}
+          {/* Save Button */}
           {isSuper && (
             <button
               type="submit"
@@ -324,11 +336,17 @@ export default function SettingsPage() {
               className="btn-primary"
               style={{ padding: '12px 24px', alignSelf: 'flex-start', marginTop: 12 }}
             >
-              <Save size={16} /> {saving ? 'Saving...' : 'Save Settings'}
+              <Save size={16} /> {saving ? 'Saving…' : 'Save Settings'}
             </button>
           )}
         </form>
       </div>
+
+      <style>{`
+        @media (max-width: 600px) {
+          .settings-grid-2 { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     try {
-      await adminAuth.verifyIdToken(session, true);
+      await adminAuth.verifyIdToken(session);
     } catch {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
