@@ -1,49 +1,56 @@
-import { getProducts } from '@/lib/firebase/server';
+import { getProducts, getCategories } from '@/lib/firebase/server';
 import ProductCard from '@/components/store/ProductCard';
 import Link from 'next/link';
 
-const categoryMap = {
-  'plush-toys':     { name: 'Plush Toys',       emoji: '🧸' },
-  'accessories':    { name: 'Accessories',       emoji: '🔑' },
-  'gifts':          { name: 'Gifts',             emoji: '🎁' },
-  'anime-plushies': { name: 'Anime Plushies',    emoji: '⭐' },
-};
+export const revalidate = 30;
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const cat = categoryMap[resolvedParams.category];
+  const slug = resolvedParams.category;
+
+  // Fetch categories to get name/emoji dynamically
+  const categories = await getCategories();
+  const cat = categories.find((c) => c.slug === slug);
+
   return {
     title: cat ? `${cat.name} — Cute Things` : 'Shop by Category',
     description: `Shop cute ${cat?.name ?? 'products'} in Sri Lanka. Island-wide delivery.`,
   };
 }
 
-const categoryLinks = [
-  { label: 'All',           href: '/shop',                slug: null             },
-  { label: '🧸 Plush Toys', href: '/shop/plush-toys',     slug: 'plush-toys'     },
-  { label: '🔑 Accessories',href: '/shop/accessories',    slug: 'accessories'    },
-  { label: '🎁 Gifts',      href: '/shop/gifts',          slug: 'gifts'          },
-  { label: '⭐ Anime',      href: '/shop/anime-plushies', slug: 'anime-plushies' },
-];
-
-export const revalidate = 30;
-
 export async function generateStaticParams() {
-  return [
-    { category: 'plush-toys'     },
-    { category: 'accessories'    },
-    { category: 'gifts'          },
-    { category: 'anime-plushies' },
-  ];
+  // Fetch dynamic slugs from Firestore for static generation
+  try {
+    const categories = await getCategories();
+    return categories.map((c) => ({ category: c.slug }));
+  } catch {
+    // Fallback so build doesn't fail if Firestore unreachable at build time
+    return [];
+  }
 }
 
 export default async function CategoryPage({ params }) {
   const resolvedParams = await params;
-  const slug     = resolvedParams.category;
-  const catInfo  = categoryMap[slug];
-  const products = await getProducts({ categorySlug: slug });
+  const slug = resolvedParams.category;
 
-  const pageTitle = catInfo ? `${catInfo.emoji} ${catInfo.name}` : 'Products';
+  const [products, categories] = await Promise.all([
+    getProducts({ categorySlug: slug }),
+    getCategories(),
+  ]);
+
+  // Sort categories by sortOrder if present, otherwise by name
+  const sortedCategories = [...categories].sort((a, b) => {
+    if (a.sortOrder != null && b.sortOrder != null) return a.sortOrder - b.sortOrder;
+    if (a.sortOrder != null) return -1;
+    if (b.sortOrder != null) return 1;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  // Find current category info for the page header
+  const currentCat = sortedCategories.find((c) => c.slug === slug);
+  const pageTitle = currentCat
+    ? (currentCat.emoji ? `${currentCat.emoji} ${currentCat.name}` : currentCat.name)
+    : 'Products';
 
   return (
     <div style={{ minHeight: '70vh' }}>
@@ -60,10 +67,25 @@ export default async function CategoryPage({ params }) {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
         {/* Category Pills */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 40 }}>
-          {categoryLinks.map((c) => {
-            const isActive = c.slug === slug;
+          {/* "All" pill */}
+          <Link href="/shop" style={{
+            textDecoration: 'none', padding: '8px 18px',
+            borderRadius: 9999, fontSize: 14, fontWeight: 500,
+            background: '#fff',
+            color: '#1e1a1d',
+            border: '1.5px solid #eae3dc',
+            transition: 'all .2s',
+            boxShadow: 'none',
+          }}>
+            All
+          </Link>
+
+          {sortedCategories.map((cat) => {
+            const isActive = cat.slug === slug;
+            const label = cat.emoji ? `${cat.emoji} ${cat.name}` : cat.name;
+            const href = `/shop/${cat.slug}`;
             return (
-              <Link key={c.href} href={c.href} style={{
+              <Link key={cat.id} href={href} style={{
                 textDecoration: 'none', padding: '8px 18px',
                 borderRadius: 9999, fontSize: 14, fontWeight: 500,
                 background: isActive ? '#1e1a1d' : '#fff',
@@ -72,7 +94,7 @@ export default async function CategoryPage({ params }) {
                 transition: 'all .2s',
                 boxShadow: isActive ? '0 4px 12px rgba(30,26,29,.12)' : 'none',
               }}>
-                {c.label}
+                {label}
               </Link>
             );
           })}
