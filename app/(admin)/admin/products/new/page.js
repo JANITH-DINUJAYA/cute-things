@@ -111,7 +111,7 @@ export default function NewProductPage() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       <button onClick={() => router.back()}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: 14, marginBottom: 24 }}>
         <ArrowLeft size={16} /> Back

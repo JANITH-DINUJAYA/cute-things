@@ -17,7 +17,7 @@ import { sendOrderConfirmation, sendAdminNewOrderAlert } from '@/lib/email';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { customer, items, couponCode } = body;
+    const { customer, items, couponCode, paymentMethod = 'cod', paymentSlipUrl = null, isPaid = false } = body;
 
     // ── Basic validation ─────────────────────────────────────────────
     if (!customer?.name || !customer?.email || !customer?.phone) {
@@ -73,7 +73,9 @@ export async function POST(request) {
       couponCode: couponCode || null,
       shippingFee: actualShippingFee,
       total,
-      paymentMethod:  'cod',
+      paymentMethod,
+      paymentSlipUrl,
+      isPaid: isPaid ?? false,
       status:         'pending',
       notes:          customer.notes || '',
       statusHistory: [

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link  from 'next/link';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart, Eye, Package } from 'lucide-react';
 import useCartStore from '@/store/cartStore';
 import { useState } from 'react';
 
@@ -34,10 +34,10 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <Link href={`/product/${slug}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link href={`/product/${slug}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div
         className="card"
-        style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer' }}
+        style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer', display: 'flex', flexDirection: 'column', height: '100%', flex: 1 }}
       >
         {/* Badges */}
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 2, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -69,8 +69,8 @@ export default function ProductCard({ product }) {
               style={{ objectFit: 'cover' }}
             />
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 48 }}>
-              🌸
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#c5a880' }}>
+              <Package size={36} />
             </div>
           )}
 
@@ -87,15 +87,17 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Info */}
-        <div className="product-card-info" style={{ padding: '14px 16px 16px' }}>
-          <h3 className="product-card-title" style={{ fontSize: 14, fontWeight: 500, color: '#1e1a1d', margin: '0 0 8px', lineHeight: 1.4,
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        <div className="product-card-info" style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+          <h3 className="product-card-title" style={{
+            margin: '0 0 8px', minHeight: '40px',
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+          }}>
             {name}
           </h3>
 
           {/* Price */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span className="product-card-price" style={{ fontSize: 16, fontWeight: 600, color: '#1e1a1d' }}>
+            <span className="product-card-price">
               Rs. {(discountPrice ?? price).toLocaleString()}
             </span>
             {discountPrice && (
@@ -116,6 +118,7 @@ export default function ProductCard({ product }) {
               opacity: isOutOfStock ? 0.5 : 1,
               cursor: isOutOfStock ? 'not-allowed' : 'pointer',
               background: added ? 'linear-gradient(135deg,#10b981,#059669)' : undefined,
+              marginTop: 'auto'
             }}
           >
             <ShoppingCart size={14} />
@@ -123,6 +126,7 @@ export default function ProductCard({ product }) {
           </button>
         </div>
       </div>
+
     </Link>
   );
 }

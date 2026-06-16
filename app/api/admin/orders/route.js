@@ -37,6 +37,8 @@ export async function GET() {
         total:       data.total      ?? 0,
         status:      data.status     ?? 'pending',
         paymentMethod: data.paymentMethod ?? 'cod',
+        paymentSlipUrl: data.paymentSlipUrl ?? null,
+        isPaid:      data.isPaid     ?? false,
         notes:       data.notes      ?? '',
         statusHistory: (data.statusHistory ?? []).map((h) => ({
           ...h,
@@ -68,21 +70,28 @@ export async function PATCH(request) {
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
-    const { orderId, status } = await request.json();
-    if (!orderId || !status) {
-      return NextResponse.json({ error: 'orderId and status are required' }, { status: 400 });
+    const { orderId, status, isPaid } = await request.json();
+    if (!orderId) {
+      return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
     }
 
     const { FieldValue } = await import('firebase-admin/firestore');
-    await adminDb.collection('orders').doc(orderId).update({
-      status,
-      updatedAt: new Date(),
-      statusHistory: FieldValue.arrayUnion({
+    const updateData = { updatedAt: new Date() };
+
+    if (status !== undefined) {
+      updateData.status = status;
+      updateData.statusHistory = FieldValue.arrayUnion({
         status,
         changedAt: new Date(),
         changedBy: 'admin',
-      }),
-    });
+      });
+    }
+
+    if (isPaid !== undefined) {
+      updateData.isPaid = isPaid;
+    }
+
+    await adminDb.collection('orders').doc(orderId).update(updateData);
 
     return NextResponse.json({ success: true });
   } catch (err) {

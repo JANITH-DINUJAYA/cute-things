@@ -105,7 +105,7 @@ export default function SettingsPage() {
   if (loading) return <LoadingState />;
 
   return (
-    <div style={{ maxWidth: 800 }}>
+    <div style={{ width: '100%' }}>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: '0.02em', fontFamily: 'var(--font-serif)' }}>Settings</h2>

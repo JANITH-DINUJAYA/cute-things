@@ -176,14 +176,14 @@ export default function EditProductPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
         {[1,2,3].map((k) => <div key={k} className="skeleton" style={{ height: 120, borderRadius: 16 }} />)}
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       {/* Back & title */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <button onClick={() => router.back()}

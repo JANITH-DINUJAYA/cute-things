@@ -27,7 +27,26 @@ export default function Navbar() {
 
   return (
     <>
+      <div style={{
+        background: '#120f11',
+        color: '#e6d5b8',
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        textAlign: 'center',
+        padding: '8px 24px',
+        borderBottom: '1px solid rgba(197,168,128,0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        fontFamily: 'var(--font-sans)',
+      }}>
+        <span>🚚 Island-wide Delivery in Sri Lanka</span>
+      </div>
       <header
+
         style={{
           position:  'sticky',
           top:       0,

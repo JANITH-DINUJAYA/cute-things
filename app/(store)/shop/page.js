@@ -36,38 +36,29 @@ export default async function ShopPage() {
       </div>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
-        {/* Category Pills */}
+        {/* Category Pills — clean text-only, no emojis */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 40 }}>
-          {/* "All" pill — always active on this page */}
           <Link href="/shop" style={{
             textDecoration: 'none', padding: '8px 18px',
-            borderRadius: 9999, fontSize: 14, fontWeight: 500,
-            background: '#1e1a1d',
-            color: '#fff',
+            borderRadius: 9999, fontSize: 13, fontWeight: 600,
+            background: '#1e1a1d', color: '#fff',
             border: '1.5px solid #1e1a1d',
-            transition: 'all .2s',
-            boxShadow: '0 4px 12px rgba(30,26,29,.12)',
+            display: 'inline-flex', alignItems: 'center', gap: 6,
           }}>
             All
           </Link>
 
-          {sortedCategories.map((cat) => {
-            const label = cat.emoji ? `${cat.emoji} ${cat.name}` : cat.name;
-            const href = `/shop/${cat.slug}`;
-            return (
-              <Link key={cat.id} href={href} style={{
-                textDecoration: 'none', padding: '8px 18px',
-                borderRadius: 9999, fontSize: 14, fontWeight: 500,
-                background: '#fff',
-                color: '#1e1a1d',
-                border: '1.5px solid #eae3dc',
-                transition: 'all .2s',
-                boxShadow: 'none',
-              }}>
-                {label}
-              </Link>
-            );
-          })}
+          {sortedCategories.map((cat) => (
+            <Link key={cat.id} href={`/shop/${cat.slug}`} style={{
+              textDecoration: 'none', padding: '8px 18px',
+              borderRadius: 9999, fontSize: 13, fontWeight: 500,
+              background: '#fff', color: '#1e1a1d',
+              border: '1.5px solid #eae3dc',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+            }}>
+              {cat.name}
+            </Link>
+          ))}
         </div>
 
         {/* Grid */}
@@ -77,12 +68,24 @@ export default async function ShopPage() {
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '80px 24px' }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🌸</div>
+            <div style={{
+              width: 72, height: 72, borderRadius: '50%',
+              background: 'rgba(197,168,128,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 20px', color: '#c5a880',
+            }}>
+              {/* Shopping bag inline SVG (lucide Package) */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" x2="21" y1="6" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </div>
             <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12 }}>No products yet</h2>
             <p style={{ color: '#6b7280' }}>Products will be added soon. Follow us on TikTok for updates!</p>
             <a href="https://www.tiktok.com/@cute.things516" target="_blank" rel="noreferrer"
                className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', marginTop: 24 }}>
-              🎵 Follow on TikTok
+              Follow on TikTok
             </a>
           </div>
         )}

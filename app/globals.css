@@ -148,6 +148,42 @@ h1, h2, h3, h4, h5, h6, .font-serif {
   color: #fff;
 }
 
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #c5a880;
+  color: #1e1a1d;
+  border: 1px solid #c5a880;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(197, 168, 128, 0.15);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-gold:hover {
+    background: #b0936b;
+    border-color: #b0936b;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(197, 168, 128, 0.3);
+  }
+}
+
+.btn-gold:active {
+  background: #9c805a;
+  border-color: #9c805a;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+
 /* ── Utility: Badge ───────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;
@@ -237,8 +273,8 @@ h1, h2, h3, h4, h5, h6, .font-serif {
 
 /* Category Card Luxury Styling */
 .category-card {
-  border-radius: 20px;
-  padding: 36px 24px;
+  border-radius: 14px;
+  padding: 18px 12px;
   background: #ffffff;
   text-align: center;
   cursor: pointer;
@@ -288,8 +324,22 @@ h1, h2, h3, h4, h5, h6, .font-serif {
   }
 }
 
+.product-card-title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: #1e1a1d;
+  line-height: 1.45;
+}
+
+.product-card-price {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: #1e1a1d;
+}
+
 /* ── Storefront Mobile Layout Polish ──────────────────────────────────────── */
 .product-grid {
+
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;

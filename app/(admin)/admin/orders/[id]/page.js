@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, Clock, ShoppingBag, CreditCard, FileText } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, Clock, ShoppingBag, CreditCard, FileText, Landmark, Package } from 'lucide-react';
 
 const STATUS_OPTIONS = [
   { value: 'pending',            label: 'Pending',            color: '#f57f17', bg: '#fffde7' },
@@ -82,6 +82,33 @@ export default function OrderDetailPage({ params }) {
     }
   }
 
+  async function togglePaymentStatus() {
+    try {
+      setUpdating(true);
+      const newPaid = !order.isPaid;
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, isPaid: newPaid }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update payment status');
+      }
+      
+      const reloadRes = await fetch(`/api/admin/orders/${orderId}`);
+      const reloadData = await reloadRes.json();
+      if (reloadRes.ok) {
+        setOrder(reloadData.order);
+      }
+    } catch (err) {
+      console.error('[togglePaymentStatus]', err);
+      alert(err.message);
+    } finally {
+      setUpdating(false);
+    }
+  }
+
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -109,7 +136,7 @@ export default function OrderDetailPage({ params }) {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       {/* Top action header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
         <div>
@@ -165,7 +192,7 @@ export default function OrderDetailPage({ params }) {
                             {item.image ? (
                               <Image src={item.image} alt={item.name} width={44} height={44} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                             ) : (
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 20 }}>🌸</div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#c5a880' }}><Package size={18} /></div>
                             )}
                           </div>
                           <div>
@@ -268,9 +295,50 @@ export default function OrderDetailPage({ params }) {
               <div style={{ borderTop: '1px solid #fcf9f6', paddingTop: 12 }}>
                 <p style={{ margin: '0 0 4px', fontSize: 12, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>Payment Method</p>
                 <span style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CreditCard size={14} color="#6b7280" /> Cash on Delivery (COD)
+                  {order.paymentMethod === 'bank_transfer' ? (
+                    <><Landmark size={14} color="#c5a880" /> Bank Transfer</>
+                  ) : order.paymentMethod === 'card' ? (
+                    <><CreditCard size={14} color="#3b82f6" /> Card Payment (Mock)</>
+                  ) : (
+                    <><CreditCard size={14} color="#6b7280" /> Cash on Delivery (COD)</>
+                  )}
                 </span>
               </div>
+
+              <div style={{ borderTop: '1px solid #fcf9f6', paddingTop: 12 }}>
+                <p style={{ margin: '0 0 4px', fontSize: 12, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>Payment Status</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span style={{
+                    background: order.isPaid ? '#e8f5e9' : '#ffebee',
+                    color: order.isPaid ? '#2e7d32' : '#c62828',
+                    padding: '3px 10px', borderRadius: 9999, fontSize: 12, fontWeight: 600
+                  }}>
+                    {order.isPaid ? 'Paid' : 'Unpaid'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={togglePaymentStatus}
+                    disabled={updating}
+                    style={{
+                      background: 'none', border: '1px solid #c5a880', color: '#c5a880',
+                      padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                      cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    {order.isPaid ? 'Mark as Unpaid' : 'Mark as Paid'}
+                  </button>
+                </div>
+              </div>
+
+              {order.paymentMethod === 'bank_transfer' && order.paymentSlipUrl && (
+                <div style={{ borderTop: '1px solid #fcf9f6', paddingTop: 12 }}>
+                  <p style={{ margin: '0 0 6px', fontSize: 12, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>Bank Receipt Slip</p>
+                  <a href={order.paymentSlipUrl} target="_blank" rel="noreferrer" style={{ display: 'block', position: 'relative', width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', border: '1px solid #eae3dc', cursor: 'zoom-in' }}>
+                    <Image src={order.paymentSlipUrl} alt="Bank Slip Screenshot" fill style={{ objectFit: 'cover' }} />
+                  </a>
+                  <span style={{ display: 'block', fontSize: 11, color: '#9ca3af', textAlign: 'center', marginTop: 4 }}>Click to view full image</span>
+                </div>
+              )}
             </div>
           </div>
 

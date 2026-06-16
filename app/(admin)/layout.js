@@ -46,8 +46,10 @@ export default function AdminLayout({ children }) {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'linear-gradient(135deg,#1a1a2e,#16213e)' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>🌸</div>
-          <div style={{ width: 40, height: 40, border: '3px solid rgba(233,30,140,.3)', borderTop: '3px solid #e91e8c',
+          <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(197,168,128,0.15)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px', color:'#c5a880' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div style={{ width: 40, height: 40, border: '3px solid rgba(197,168,128,.3)', borderTop: '3px solid #c5a880',
             borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>

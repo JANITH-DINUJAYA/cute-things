@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '@/lib/firebase/client';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
-import { Plus, Pencil, Trash2, Tag, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Tag, X, AlertTriangle } from 'lucide-react';
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -15,10 +15,44 @@ export default function CategoriesPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const snap = await getDocs(query(collection(db, 'categories'), orderBy('sortOrder', 'asc')));
-    setCategories(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    setLoading(false);
+    try {
+      // NOTE: We do NOT use orderBy('sortOrder') here because Firestore excludes
+      // documents that don't have the sortOrder field from ordered queries.
+      // Categories seeded via the seed script may not have sortOrder, so we
+      // fetch all and sort client-side.
+      const snap = await getDocs(collection(db, 'categories'));
+      if (snap.empty) {
+        const DEFAULT_CATEGORIES = [
+          { name: 'Plush Toys',  slug: 'plush-toys',    isVisible: true, sortOrder: 1, parentId: null, createdAt: new Date(), updatedAt: new Date() },
+          { name: 'Accessories', slug: 'accessories',   isVisible: true, sortOrder: 2, parentId: null, createdAt: new Date(), updatedAt: new Date() },
+          { name: 'Gifts',       slug: 'gifts',         isVisible: true, sortOrder: 3, parentId: null, createdAt: new Date(), updatedAt: new Date() },
+          { name: 'Anime',       slug: 'anime-plushies',isVisible: true, sortOrder: 4, parentId: null, createdAt: new Date(), updatedAt: new Date() }
+        ];
+        for (const cat of DEFAULT_CATEGORIES) {
+          await addDoc(collection(db, 'categories'), cat);
+        }
+        const reloadSnap = await getDocs(collection(db, 'categories'));
+        const data = reloadSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setCategories(sortCategories(data));
+      } else {
+        const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setCategories(sortCategories(data));
+      }
+    } catch (err) {
+      console.error('Failed to load or seed categories:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  function sortCategories(list) {
+    return [...list].sort((a, b) => {
+      const aOrder = a.sortOrder ?? 999;
+      const bOrder = b.sortOrder ?? 999;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
 
   useEffect(() => { load(); }, [load]);
 
@@ -147,7 +181,9 @@ export default function CategoriesPage() {
       {confirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div className="card" style={{ padding: 28, maxWidth: 360, width: '90%', textAlign: 'center' }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff5f5', border: '1.5px solid #fecaca', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: '#dc2626' }}>
+              <AlertTriangle size={24} />
+            </div>
             <h3 style={{ margin: '0 0 8px' }}>Delete "{confirm.name}"?</h3>
             <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 20 }}>Products in this category won't be deleted but will lose their category.</p>
             <div style={{ display: 'flex', gap: 12 }}>

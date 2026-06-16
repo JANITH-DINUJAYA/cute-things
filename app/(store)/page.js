@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { getFeaturedProducts, getNewArrivals } from '@/lib/firebase/server';
+import { getFeaturedProducts, getNewArrivals, getCategories } from '@/lib/firebase/server';
 import ProductCard from '@/components/store/ProductCard';
-import { ArrowRight, Truck, Shield, RefreshCw, Star } from 'lucide-react';
+import CategoryGrid from '@/components/store/CategoryGrid';
+import { ArrowRight, Truck, Shield, RefreshCw, Star, Heart, Sparkles, Gift, Gem, ShoppingBag } from 'lucide-react';
 
 export const metadata = {
   title: 'Cute Things — Plush Toys, Gifts & Cute Accessories in Sri Lanka',
@@ -9,13 +10,6 @@ export const metadata = {
 };
 
 export const revalidate = 60;
-
-const categories = [
-  { name: 'Plush Toys',  slug: 'plush-toys',    emoji: '🧸', desc: 'Teddy bears & anime plushies' },
-  { name: 'Accessories', slug: 'accessories',    emoji: '🔑', desc: 'Keychains, stickers & more' },
-  { name: 'Gifts',       slug: 'gifts',          emoji: '🎁', desc: 'Perfect for any occasion' },
-  { name: 'Anime',       slug: 'anime-plushies', emoji: '⭐', desc: 'Your fav characters as plushies' },
-];
 
 const features = [
   { icon: Truck,     title: 'Island-wide Delivery',  desc: 'We deliver across all of Sri Lanka'    },
@@ -25,16 +19,19 @@ const features = [
 ];
 
 export default async function HomePage() {
-  const [featured, newArrivals] = await Promise.all([
+  const [featured, newArrivals, dbCategories] = await Promise.all([
     getFeaturedProducts(8),
     getNewArrivals(8),
+    getCategories(),
   ]);
+
+  const floatingIcons = [Heart, Sparkles, Gift, Star, Gem, ShoppingBag];
 
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section style={{
-        position: 'relative', overflow: 'hidden', minHeight: '85vh',
+        position: 'relative', overflow: 'hidden', minHeight: '80vh',
         display: 'flex', alignItems: 'center',
         background: 'linear-gradient(135deg, #1e1a1d 0%, #120f11 100%)',
         borderBottom: '1px solid rgba(197,168,128,0.1)',
@@ -42,25 +39,20 @@ export default async function HomePage() {
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
           <div style={{ position:'absolute', top:'-15%', right:'-5%', width:600, height:600, borderRadius:'50%', background:'radial-gradient(circle,rgba(197,168,128,.15) 0%,transparent 70%)' }} />
           <div style={{ position:'absolute', bottom:'-20%', left:'-10%', width:500, height:500, borderRadius:'50%', background:'radial-gradient(circle,rgba(229,179,179,.1) 0%,transparent 70%)' }} />
-          {['🧸','🌸','💖','⭐','🎀','🌷'].map((e, i) => (
+          {floatingIcons.map((Icon, i) => (
             <div key={i} style={{
-              position:'absolute', fontSize: 28 + (i * 4),
+              position:'absolute',
               top: `${10 + i * 15}%`, left: `${5 + i * 14}%`,
-              opacity: 0.1, animation: `float${i % 3} ${4 + i}s ease-in-out infinite`,
-            }}>{e}</div>
+              opacity: 0.08, color: '#c5a880',
+              animation: `float${i % 3} ${4 + i}s ease-in-out infinite`,
+            }}>
+              <Icon size={28 + (i * 6)} />
+            </div>
           ))}
         </div>
 
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'80px 24px', position:'relative', zIndex:1, width:'100%' }}>
           <div style={{ maxWidth:640 }}>
-            <div style={{
-              display:'inline-flex', alignItems:'center', gap:8,
-              background:'rgba(197,168,128,.1)', border:'1px solid rgba(197,168,128,.2)',
-              borderRadius:9999, padding:'6px 16px', marginBottom:24,
-            }}>
-              <span style={{ fontSize:13, color:'#e6d5b8', fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase' }}>🌟 Island-wide Delivery in Sri Lanka</span>
-            </div>
-
             <h1 style={{ fontSize:'clamp(36px,6vw,72px)', fontWeight:300, fontFamily:'var(--font-serif)', lineHeight:1.1, color:'#fff', margin:'0 0 24px', letterSpacing:'0.02em' }}>
               Discover{' '}
               <span style={{ background:'linear-gradient(135deg,#c5a880,#e5b3b3)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
@@ -74,22 +66,23 @@ export default async function HomePage() {
             </p>
 
             <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-              <Link href="/shop" className="btn-primary" style={{ textDecoration:'none', fontSize:14, padding:'14px 32px' }}>
+              <Link href="/shop" className="btn-gold" style={{ textDecoration:'none', fontSize:14, padding:'14px 32px' }}>
                 Shop Collection <ArrowRight size={18} />
               </Link>
-              <Link href="/shop/plush-toys" className="btn-outline" style={{
-                textDecoration:'none', fontSize:14, padding:'14px 32px',
-                borderColor:'rgba(255,255,255,.2)', color:'#fff',
-              }}>
-                Plush Toys 🧸
+              <Link href="/shop/plush-toys" className="btn-outline" style={{ textDecoration:'none', fontSize:14, padding:'14px 32px', color:'#fff', borderColor:'rgba(255,255,255,0.4)' }}>
+                <Heart size={16} /> Plush Toys
               </Link>
             </div>
 
             <div style={{ display:'flex', gap:32, marginTop:48, flexWrap:'wrap' }}>
-              {[['500+','Happy Clients'],['50+','Boutique Products'],['⭐ 4.9','Client Rating']].map(([val, label]) => (
+              {[
+                ['5000+', 'Happy Clients'],
+                ['50+', 'Boutique Products'],
+                ['⭐ 4.9', 'Client Rating']
+              ].map(([val, label]) => (
                 <div key={label}>
-                  <div style={{ fontSize:24, fontWeight:400, fontFamily:'var(--font-serif)', color:'#fff', letterSpacing:'0.04em' }}>{val}</div>
-                  <div style={{ fontSize:12, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:'0.06em', marginTop:2 }}>{label}</div>
+                  <div style={{ fontSize:26, fontWeight:700, fontFamily:'var(--font-sans)', color:'#c5a880', letterSpacing:'0.04em' }}>{val}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,.5)', textTransform:'uppercase', letterSpacing:'0.06em', marginTop:2 }}>{label}</div>
                 </div>
               ))}
             </div>
@@ -112,23 +105,8 @@ export default async function HomePage() {
             </h2>
             <p style={{ color:'#6b7280', fontSize:16 }}>Find exactly what you're looking for</p>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:20 }}>
-            {categories.map((cat) => (
-              <Link key={cat.slug} href={`/shop/${cat.slug}`} style={{ textDecoration:'none' }}>
-                <div className="category-card">
-                  <div style={{ 
-                    fontSize:52, marginBottom:18,
-                    filter: 'drop-shadow(0 4px 10px rgba(197, 168, 128, 0.15))'
-                  }}>{cat.emoji}</div>
-                  <h3 style={{ 
-                    fontSize:20, fontWeight:400, color:'#1e1a1d', margin:'0 0 8px',
-                    fontFamily: 'var(--font-serif)', letterSpacing: '0.02em'
-                  }}>{cat.name}</h3>
-                  <p style={{ fontSize:13, color:'rgba(30,26,29,.6)', margin:0 }}>{cat.desc}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          
+          <CategoryGrid categories={dbCategories} />
         </div>
       </section>
 
@@ -139,7 +117,7 @@ export default async function HomePage() {
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:48, flexWrap:'wrap', gap:16 }}>
               <div>
                 <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 8px' }}>
-                  ⭐ Featured <span className="gradient-brand-text">Products</span>
+                  Featured <span className="gradient-brand-text">Products</span>
                 </h2>
                 <p style={{ color:'#6b7280', margin:0 }}>Our most loved items</p>
               </div>
@@ -161,7 +139,7 @@ export default async function HomePage() {
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:48, flexWrap:'wrap', gap:16 }}>
               <div>
                 <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 8px' }}>
-                  🆕 New <span className="gradient-brand-text">Arrivals</span>
+                  New <span className="gradient-brand-text">Arrivals</span>
                 </h2>
                 <p style={{ color:'#6b7280', margin:0 }}>Fresh & adorable additions</p>
               </div>
@@ -180,7 +158,9 @@ export default async function HomePage() {
       {featured.length === 0 && newArrivals.length === 0 && (
         <section style={{ padding:'80px 24px', textAlign:'center' }}>
           <div style={{ maxWidth:480, margin:'0 auto' }}>
-            <div style={{ fontSize:64, marginBottom:16 }}>🌸</div>
+            <div style={{ width:72, height:72, borderRadius:'50%', background:'rgba(197,168,128,0.1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px', color:'#c5a880' }}>
+              <ShoppingBag size={32} />
+            </div>
             <h2 style={{ fontSize:28, fontWeight:800, marginBottom:12 }}>Products Coming Soon!</h2>
             <p style={{ color:'#6b7280' }}>We're adding our cute collection. Check back soon!</p>
           </div>
@@ -206,25 +186,27 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── TikTok CTA ────────────────────────────────────────────────────── */}
+      {/* ── TikTok CTA ────────────────────────────────────────────────────────── */}
       <section style={{ padding:'80px 24px', background:'#fff', textAlign:'center' }}>
         <div style={{ maxWidth:600, margin:'0 auto' }}>
-          <div style={{ fontSize:48, marginBottom:16 }}>🎵</div>
+          <div style={{ width:64, height:64, borderRadius:'50%', background:'linear-gradient(135deg,#1e1a1d,#333)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+          </div>
           <h2 style={{ fontSize:'clamp(24px,4vw,38px)', fontWeight:800, margin:'0 0 16px' }}>
             Follow us on <span className="gradient-brand-text">TikTok</span>
           </h2>
           <p style={{ color:'#6b7280', fontSize:16, marginBottom:32 }}>
-            Watch our unboxing videos, cute product showcases, and more on TikTok @cute.things516 🌸
+            Watch our unboxing videos, cute product showcases, and more on TikTok @cute.things516
           </p>
           <a
             href="https://www.tiktok.com/@cute.things516"
             target="_blank"
             rel="noreferrer"
             id="tiktok-cta"
-            className="btn-primary"
+            className="btn-gold"
             style={{ textDecoration:'none', fontSize:16, padding:'14px 32px' }}
           >
-            🎵 Follow @cute.things516
+            Follow @cute.things516
           </a>
         </div>
       </section>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import useCartStore from '@/store/cartStore';
 import useSettingsStore from '@/store/settingsStore';
-import { ArrowLeft, CheckCircle, Truck, User, Phone, MapPin, FileText, AlertCircle, Tag } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Truck, User, Phone, MapPin, FileText, AlertCircle, Tag, Landmark, CreditCard, Upload, Package, LockKeyhole, ImageIcon } from 'lucide-react';
 
 export default function CheckoutPage() {
   const router   = useRouter();
@@ -50,6 +50,14 @@ export default function CheckoutPage() {
     name: '', email: '', phone: '',
     address: '', city: '', postalCode: '', notes: '',
   });
+  
+  // Payment States
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [slipFile, setSlipFile] = useState(null);
+  const [slipUploading, setSlipUploading] = useState(false);
+  const [slipUrl, setSlipUrl] = useState('');
+  const [cardForm, setCardForm] = useState({ number: '', name: '', expiry: '', cvv: '' });
+
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -62,15 +70,49 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <div style={{ fontSize: 64 }}>🛒</div>
+        <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(197,168,128,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c5a880' }}>
+          <Package size={36} />
+        </div>
         <h2 style={{ fontWeight: 800 }}>Your cart is empty</h2>
-        <Link href="/shop" className="btn-primary" style={{ textDecoration: 'none' }}>Back to Shop</Link>
+        <Link href="/shop" className="btn-gold" style={{ textDecoration: 'none' }}>Back to Shop</Link>
       </div>
     );
   }
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  }
+
+  function handleCardChange(e) {
+    setCardForm((c) => ({ ...c, [e.target.name]: e.target.value }));
+  }
+
+  async function handleSlipUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSlipFile(file);
+    setSlipUploading(true);
+    setError('');
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise((res, rej) => {
+        reader.onload = () => res(reader.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+      const resp = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, name: file.name }),
+      });
+      if (!resp.ok) throw new Error('Slip upload failed');
+      const data = await resp.json();
+      setSlipUrl(data.url);
+    } catch (err) {
+      setError('Failed to upload payment slip: ' + err.message);
+    } finally {
+      setSlipUploading(false);
+    }
   }
 
   async function handleSubmit(e) {
@@ -80,7 +122,19 @@ export default function CheckoutPage() {
       setError('Please fill in all required fields.');
       return;
     }
+
+    if (paymentMethod === 'bank_transfer' && !slipUrl) {
+      setError('Please upload your bank transfer payment slip receipt.');
+      return;
+    }
+
     setLoading(true);
+    
+    // Mock processing for card payment
+    if (paymentMethod === 'card') {
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -89,6 +143,9 @@ export default function CheckoutPage() {
           customer:    form,
           items:       items.map((i) => ({ productId: i.id, name: i.name, price: i.price, qty: i.quantity, image: i.image })),
           couponCode:  appliedCoupon?.code || null,
+          paymentMethod,
+          paymentSlipUrl: paymentMethod === 'bank_transfer' ? slipUrl : null,
+          isPaid: paymentMethod === 'card', // Card is instantly marked paid for showoff
         }),
       });
       const data = await res.json();
@@ -130,7 +187,7 @@ export default function CheckoutPage() {
       </Link>
 
       <h1 style={{ fontSize: 'clamp(24px,4vw,36px)', fontWeight: 800, marginBottom: 40 }}>
-        Checkout <span className="gradient-brand-text">💖</span>
+        Checkout
       </h1>
 
       <form onSubmit={handleSubmit}>
@@ -182,18 +239,172 @@ export default function CheckoutPage() {
               <Field label="Special instructions or notes" name="notes" placeholder="Any delivery notes, gift messages, etc." textarea />
             </div>
 
-            {/* Payment Method */}
+            {/* Payment Method Selector */}
             <div className="card" style={{ padding: 28 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Truck size={18} color="#e91e8c" /> Payment Method
+              <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <CreditCard size={18} color="#e91e8c" /> Payment Method
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f0fdf4', border: '2px solid #10b981', borderRadius: 12, padding: '14px 18px' }}>
-                <CheckCircle size={20} color="#10b981" fill="#10b981" />
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700, color: '#065f46' }}>Cash on Delivery</p>
-                  <p style={{ margin: 0, fontSize: 13, color: '#047857' }}>Pay when your order arrives at your door</p>
+              
+              {/* Selector Tabs */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 20 }}>
+                {/* COD Option */}
+                <div
+                  type="button"
+                  onClick={() => setPaymentMethod('cod')}
+                  style={{
+                    padding: '16px', borderRadius: 12, border: `2px solid ${paymentMethod === 'cod' ? '#c5a880' : '#f0f0f0'}`,
+                    background: paymentMethod === 'cod' ? 'rgba(197,168,128,0.05)' : '#fff', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s'
+                  }}
+                >
+                  <Truck size={24} color={paymentMethod === 'cod' ? '#c5a880' : '#9ca3af'} />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#1e1a1d', textAlign: 'center' }}>Cash on Delivery</span>
+                </div>
+
+                {/* Bank Transfer Option */}
+                <div
+                  type="button"
+                  onClick={() => setPaymentMethod('bank_transfer')}
+                  style={{
+                    padding: '16px', borderRadius: 12, border: `2px solid ${paymentMethod === 'bank_transfer' ? '#c5a880' : '#f0f0f0'}`,
+                    background: paymentMethod === 'bank_transfer' ? 'rgba(197,168,128,0.05)' : '#fff', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s'
+                  }}
+                >
+                  <Landmark size={24} color={paymentMethod === 'bank_transfer' ? '#c5a880' : '#9ca3af'} />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#1e1a1d', textAlign: 'center' }}>Bank Transfer</span>
+                </div>
+
+                {/* Card Payment (Showoff) */}
+                <div
+                  type="button"
+                  onClick={() => setPaymentMethod('card')}
+                  style={{
+                    padding: '16px', borderRadius: 12, border: `2px solid ${paymentMethod === 'card' ? '#c5a880' : '#f0f0f0'}`,
+                    background: paymentMethod === 'card' ? 'rgba(197,168,128,0.05)' : '#fff', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s'
+                  }}
+                >
+                  <CreditCard size={24} color={paymentMethod === 'card' ? '#c5a880' : '#9ca3af'} />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#1e1a1d', textAlign: 'center' }}>Card Payment</span>
                 </div>
               </div>
+
+              {/* COD Form Details */}
+              {paymentMethod === 'cod' && (
+                <div style={{ background: '#fcfcfc', border: '1px solid #eaeaea', borderRadius: 12, padding: '20px' }}>
+                  <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#1e1a1d', fontSize: 15 }}>Cash on Delivery Details</p>
+                  <p style={{ margin: 0, fontSize: 13, color: '#6b7280', lineHeight: 1.6 }}>
+                    Please note that we will call or WhatsApp you to verify your delivery details before dispatching your order. Make sure your phone number is active and reachable. You can pay cash to the courier once your package arrives at your door.
+                  </p>
+                </div>
+              )}
+
+              {/* Bank Transfer Form Details */}
+              {paymentMethod === 'bank_transfer' && (
+                <div style={{ background: '#fcfcfc', border: '1px solid #eaeaea', borderRadius: 12, padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div>
+                    <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#1e1a1d', fontSize: 15 }}>Bank Account Information</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', fontSize: 13, background: '#fafafa', padding: 12, borderRadius: 8, border: '1px solid #f0f0f0' }}>
+                      <div><strong>Bank:</strong> Sampath Bank</div>
+                      <div><strong>Account Name:</strong> Cute Things Boutique</div>
+                      <div><strong>Account Number:</strong> 0123 4567 8901</div>
+                      <div><strong>Branch:</strong> Colombo Fort</div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+                      Upload Payment Slip Screenshot <span style={{ color: '#e91e8c' }}>*</span>
+                    </label>
+
+                    {/* Upload button — hidden once slip is uploaded */}
+                    {!slipUrl && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <label style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px',
+                          background: '#fff', border: '1.5px dashed #c5a880', borderRadius: 8,
+                          cursor: slipUploading ? 'wait' : 'pointer', fontSize: 13, fontWeight: 600, color: '#c5a880'
+                        }}>
+                          <Upload size={16} /> {slipUploading ? 'Uploading...' : 'Choose File'}
+                          <input type="file" accept="image/*" onChange={handleSlipUpload} disabled={slipUploading} style={{ display: 'none' }} />
+                        </label>
+                        {slipFile && !slipUrl && (
+                          <span style={{ fontSize: 13, color: '#6b7280' }}>{slipFile.name.slice(0, 24)}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Receipt preview after upload */}
+                    {slipUrl && (
+                      <div style={{
+                        marginTop: 12, borderRadius: 12, overflow: 'hidden',
+                        border: '2px solid #10b981', background: '#f0fdf4'
+                      }}>
+                        {/* Success banner */}
+                        <div style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 14px', background: '#10b981'
+                        }}>
+                          <CheckCircle size={16} color="#fff" />
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Payment slip uploaded successfully!</span>
+                        </div>
+                        {/* Image preview */}
+                        <div style={{ position: 'relative', width: '100%', maxHeight: 220, overflow: 'hidden', background: '#f9fafb' }}>
+                          <img
+                            src={slipUrl}
+                            alt="Payment receipt"
+                            style={{ width: '100%', height: 220, objectFit: 'contain', display: 'block' }}
+                          />
+                        </div>
+                        {/* Footer */}
+                        <div style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '8px 14px', background: '#fff'
+                        }}>
+                          <span style={{ fontSize: 12, color: '#6b7280' }}>
+                            <ImageIcon size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                            {slipFile?.name?.slice(0, 28)}
+                          </span>
+                          <label style={{ fontSize: 12, color: '#c5a880', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            <Upload size={11} /> Change
+                            <input type="file" accept="image/*" onChange={handleSlipUpload} style={{ display: 'none' }} />
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Card Payment Form (Showoff) */}
+              {paymentMethod === 'card' && (
+                <div style={{ background: '#fcfcfc', border: '1px solid #eaeaea', borderRadius: 12, padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <p style={{ margin: '0 0 4px', fontWeight: 700, color: '#1e1a1d', fontSize: 15 }}>Enter Card Information</p>
+                  <p style={{ margin: '0 0 12px', fontSize: 12, color: '#9ca3af' }}>Note: This payment portal is in sandbox/mock mode. Real transaction will not be made.</p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Cardholder Name</label>
+                      <input name="name" value={cardForm.name} onChange={handleCardChange} placeholder="John Doe" className="input" style={{ padding: 10 }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Card Number</label>
+                      <input name="number" value={cardForm.number} onChange={handleCardChange} placeholder="4111 2222 3333 4444" className="input" style={{ padding: 10 }} />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Expiry Date</label>
+                        <input name="expiry" value={cardForm.expiry} onChange={handleCardChange} placeholder="MM/YY" className="input" style={{ padding: 10 }} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4 }}>CVV</label>
+                        <input name="cvv" type="password" maxLength={3} value={cardForm.cvv} onChange={handleCardChange} placeholder="•••" className="input" style={{ padding: 10 }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -207,7 +418,7 @@ export default function CheckoutPage() {
                   <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', background: '#f9f0ff', flexShrink: 0 }}>
                     {item.image
                       ? <Image src={item.image} alt={item.name} width={48} height={48} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                      : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🌸</div>
+                      : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c5a880' }}><Package size={20} /></div>
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -245,15 +456,15 @@ export default function CheckoutPage() {
             <button
               id="place-order-btn"
               type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{ width: '100%', fontSize: 16, padding: 14, marginTop: 24, opacity: loading ? 0.7 : 1 }}
+              disabled={loading || slipUploading}
+              className="btn-gold"
+              style={{ width: '100%', fontSize: 16, padding: 14, marginTop: 24, opacity: (loading || slipUploading) ? 0.7 : 1 }}
             >
-              {loading ? 'Placing Order…' : '🛍️ Place Order (COD)'}
+              {loading ? 'Placing Order…' : slipUploading ? 'Uploading receipt...' : `Place Order (${paymentMethod.toUpperCase()})`}
             </button>
 
-            <p style={{ textAlign: 'center', fontSize: 12, color: '#9ca3af', marginTop: 12 }}>
-              🔒 Your information is safe and secure
+            <p style={{ textAlign: 'center', fontSize: 12, color: '#9ca3af', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+              <LockKeyhole size={11} /> Your information is safe and secure
             </p>
           </div>
         </div>

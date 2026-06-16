@@ -31,7 +31,7 @@ export default function DashboardClient({ stats }) {
     <div>
       <div style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a2e', margin: '0 0 4px' }}>
-          Good day! 👋
+          Welcome Back
         </h2>
         <p style={{ color: '#6b7280', margin: 0 }}>Here's what's happening with your store today.</p>
       </div>

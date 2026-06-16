@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase/client';
 import { collection, query, orderBy, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Search, Pencil, Trash2, Package, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Package, AlertTriangle, Star } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 
 const STATUS_STYLES = {
@@ -116,7 +116,7 @@ export default function ProductsPage() {
                           <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', background: '#f9f0ff', flexShrink: 0 }}>
                             {p.images?.[0]
                               ? <Image src={p.images[0]} alt={p.name} width={48} height={48} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                              : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🌸</div>
+                              : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c5a880' }}><Package size={20} /></div>
                             }
                           </div>
                           <div>
@@ -144,7 +144,7 @@ export default function ProductsPage() {
                         )}
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                        {p.isFeatured ? <span style={{ fontSize: 18 }}>⭐</span> : <span style={{ color: '#d1d5db' }}>—</span>}
+                        {p.isFeatured ? <Star size={16} fill="#c5a880" color="#c5a880" /> : <span style={{ color: '#d1d5db' }}>—</span>}
                       </td>
                       <td style={{ padding: '12px 16px' }}>
                         {canManage && (
@@ -173,7 +173,9 @@ export default function ProductsPage() {
       {confirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div className="card" style={{ padding: 32, maxWidth: 380, width: '90%', textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>⚠️</div>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#fff5f5', border: '1.5px solid #fecaca', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#dc2626' }}>
+              <AlertTriangle size={24} />
+            </div>
             <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>Delete Product?</h3>
             <p style={{ color: '#6b7280', marginBottom: 24, fontSize: 14 }}>This action cannot be undone.</p>
             <div style={{ display: 'flex', gap: 12 }}>

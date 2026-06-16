@@ -43,6 +43,8 @@ export async function GET(request, { params }) {
       total:       data.total      ?? 0,
       status:      data.status     ?? 'pending',
       paymentMethod: data.paymentMethod ?? 'cod',
+      paymentSlipUrl: data.paymentSlipUrl ?? null,
+      isPaid:      data.isPaid     ?? false,
       notes:       data.notes      ?? '',
       statusHistory: (data.statusHistory ?? []).map((h) => ({
         ...h,
