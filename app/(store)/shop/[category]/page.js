@@ -53,8 +53,9 @@ export default async function CategoryPage({ params }) {
   });
 
   const currentCat = sortedCategories.find((c) => c.slug === slug);
-  // No emojis in page title — clean name only
-  const pageTitle = currentCat?.name ?? 'Products';
+  const pageTitle = currentCat
+    ? (currentCat.emoji ? `${currentCat.emoji} ${currentCat.name}` : currentCat.name)
+    : 'Products';
 
   return (
     <div style={{ minHeight: '70vh' }}>
@@ -83,6 +84,7 @@ export default async function CategoryPage({ params }) {
 
           {sortedCategories.map((cat) => {
             const isActive = cat.slug === slug;
+            const label = cat.emoji ? `${cat.emoji} ${cat.name}` : cat.name;
             return (
               <Link key={cat.id || cat.slug} href={`/shop/${cat.slug}`} style={{
                 textDecoration: 'none', padding: '8px 18px',
@@ -93,7 +95,7 @@ export default async function CategoryPage({ params }) {
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 boxShadow: isActive ? '0 4px 12px rgba(30,26,29,.12)' : 'none',
               }}>
-                {cat.name}
+                {label}
               </Link>
             );
           })}

@@ -44,21 +44,25 @@ export default async function ShopPage() {
             background: '#1e1a1d', color: '#fff',
             border: '1.5px solid #1e1a1d',
             display: 'inline-flex', alignItems: 'center', gap: 6,
+            boxShadow: '0 4px 12px rgba(30,26,29,.12)',
           }}>
             All
           </Link>
 
-          {sortedCategories.map((cat) => (
-            <Link key={cat.id} href={`/shop/${cat.slug}`} style={{
-              textDecoration: 'none', padding: '8px 18px',
-              borderRadius: 9999, fontSize: 13, fontWeight: 500,
-              background: '#fff', color: '#1e1a1d',
-              border: '1.5px solid #eae3dc',
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-            }}>
-              {cat.name}
-            </Link>
-          ))}
+          {sortedCategories.map((cat) => {
+            const label = cat.emoji ? `${cat.emoji} ${cat.name}` : cat.name;
+            return (
+              <Link key={cat.id} href={`/shop/${cat.slug}`} style={{
+                textDecoration: 'none', padding: '8px 18px',
+                borderRadius: 9999, fontSize: 13, fontWeight: 500,
+                background: '#fff', color: '#1e1a1d',
+                border: '1.5px solid #eae3dc',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+              }}>
+                {label}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Grid */}

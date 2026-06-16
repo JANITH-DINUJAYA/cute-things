@@ -37,12 +37,38 @@ export default function ProductCard({ product }) {
     <Link href={`/product/${slug}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div
         className="card"
-        style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer', display: 'flex', flexDirection: 'column', height: '100%', flex: 1 }}
+        style={{
+          overflow: 'hidden',
+          position: 'relative',
+          cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          flex: 1,
+          border: isFeatured ? '1.5px solid #c5a880' : '1px solid #f0f0f0',
+          boxShadow: isFeatured ? '0 8px 24px rgba(197,168,128,0.12)' : '0 4px 12px rgba(0,0,0,0.02)',
+          transition: 'all 0.3s ease',
+        }}
       >
         {/* Badges */}
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 2, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {isFeatured && (
-            <span className="badge badge-pink product-card-badge" style={{ fontSize: 11 }}>⭐ Featured</span>
+            <span className="badge product-card-badge" style={{
+              fontSize: 10,
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: 'linear-gradient(135deg, #c5a880, #e5b3b3)',
+              color: '#fff',
+              boxShadow: '0 2px 6px rgba(197,168,128,0.25)',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
+            }}>
+              ⭐ Featured
+            </span>
           )}
           {savings > 0 && (
             <span className="badge badge-green product-card-badge" style={{ fontSize: 11 }}>-{savings}%</span>
