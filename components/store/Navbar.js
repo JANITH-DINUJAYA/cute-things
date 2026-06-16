@@ -79,7 +79,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav style={{ display: 'flex', gap: 4, alignItems: 'center' }} className="hidden-mobile">
+          <nav style={{ display: 'flex', gap: 4, alignItems: 'center', marginRight: 16 }} className="hidden-mobile">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -100,12 +100,13 @@ export default function Navbar() {
             <Link
               href="/shop/featured"
               style={{
-                padding: '7px 14px',
+                padding: '7px 16px',
                 borderRadius: 9999,
                 fontSize: 13,
                 fontWeight: 700,
                 textDecoration: 'none',
-                display: 'inline-flex', alignItems: 'center', gap: 5,
+                display: 'inline-flex',
+                alignItems: 'center',
                 letterSpacing: '0.04em',
                 background: isFeaturedActive
                   ? 'linear-gradient(135deg,#c5a880,#e5b3b3)'
@@ -116,7 +117,6 @@ export default function Navbar() {
                 boxShadow: isFeaturedActive ? '0 4px 14px rgba(197,168,128,0.3)' : 'none',
               }}
             >
-              <Star size={12} fill={isFeaturedActive ? '#fff' : '#c5a880'} color={isFeaturedActive ? '#fff' : '#c5a880'} />
               Featured
             </Link>
           </nav>
@@ -198,14 +198,13 @@ export default function Navbar() {
               style={{
                 padding: '12px 16px', borderRadius: 10,
                 fontSize: 15, fontWeight: 700, textDecoration: 'none',
-                display: 'flex', alignItems: 'center', gap: 8,
+                display: 'flex', alignItems: 'center',
                 color: isFeaturedActive ? '#fff' : '#c5a880',
                 background: isFeaturedActive
                   ? 'linear-gradient(135deg,#c5a880,#e5b3b3)'
                   : 'rgba(197,168,128,0.08)',
               }}
             >
-              <Star size={14} fill="#c5a880" color="#c5a880" />
               Featured Products
             </Link>
           </nav>
