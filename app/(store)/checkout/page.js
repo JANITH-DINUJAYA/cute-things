@@ -8,6 +8,23 @@ import useCartStore from '@/store/cartStore';
 import useSettingsStore from '@/store/settingsStore';
 import { ArrowLeft, CheckCircle, Truck, User, Phone, MapPin, FileText, AlertCircle, Tag, Landmark, CreditCard, Upload, Package, LockKeyhole, ImageIcon } from 'lucide-react';
 
+function Field({ label, name, type = 'text', placeholder, required, textarea, value, onChange }) {
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
+        {label} {required && <span style={{ color: '#e91e8c' }}>*</span>}
+      </label>
+      {textarea ? (
+        <textarea name={name} value={value} onChange={onChange} placeholder={placeholder} rows={3}
+          className="input" style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+      ) : (
+        <input name={name} type={type} value={value} onChange={onChange}
+          placeholder={placeholder} required={required} className="input" />
+      )}
+    </div>
+  );
+}
+
 export default function CheckoutPage() {
   const router   = useRouter();
   const items    = useCartStore((s) => s.items);
@@ -165,20 +182,7 @@ export default function CheckoutPage() {
     }
   }
 
-  const Field = ({ label, name, type = 'text', placeholder, required, textarea }) => (
-    <div>
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
-        {label} {required && <span style={{ color: '#e91e8c' }}>*</span>}
-      </label>
-      {textarea ? (
-        <textarea name={name} value={form[name]} onChange={handleChange} placeholder={placeholder} rows={3}
-          className="input" style={{ resize: 'vertical', fontFamily: 'inherit' }} />
-      ) : (
-        <input name={name} type={type} value={form[name]} onChange={handleChange}
-          placeholder={placeholder} required={required} className="input" />
-      )}
-    </div>
-  );
+
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px', minHeight: '70vh' }}>
@@ -209,11 +213,11 @@ export default function CheckoutPage() {
                 <User size={18} color="#e91e8c" /> Personal Information
               </h2>
               <div className="checkout-form-grid">
-                <Field label="Full Name"     name="name"  placeholder="Eg: Janith Perera" required />
-                <Field label="Phone Number"  name="phone" placeholder="07X XXX XXXX"       required type="tel" />
+                <Field label="Full Name"     name="name"  placeholder="Eg: Janith Perera" required value={form.name} onChange={handleChange} />
+                <Field label="Phone Number"  name="phone" placeholder="07X XXX XXXX"       required type="tel" value={form.phone} onChange={handleChange} />
               </div>
               <div style={{ marginTop: 16 }}>
-                <Field label="Email Address" name="email" placeholder="your@email.com"     required type="email" />
+                <Field label="Email Address" name="email" placeholder="your@email.com"     required type="email" value={form.email} onChange={handleChange} />
               </div>
             </div>
 
@@ -223,10 +227,10 @@ export default function CheckoutPage() {
                 <MapPin size={18} color="#e91e8c" /> Delivery Address
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <Field label="Street Address" name="address"    placeholder="No. 123, Main Street, Colombo 07" required />
+                <Field label="Street Address" name="address"    placeholder="No. 123, Main Street, Colombo 07" required value={form.address} onChange={handleChange} />
                 <div className="checkout-form-grid">
-                  <Field label="City"        name="city"        placeholder="Colombo"  required />
-                  <Field label="Postal Code" name="postalCode"  placeholder="00700"   />
+                  <Field label="City"        name="city"        placeholder="Colombo"  required value={form.city} onChange={handleChange} />
+                  <Field label="Postal Code" name="postalCode"  placeholder="00700"   value={form.postalCode} onChange={handleChange} />
                 </div>
               </div>
             </div>
@@ -236,7 +240,7 @@ export default function CheckoutPage() {
               <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <FileText size={18} color="#e91e8c" /> Order Notes (Optional)
               </h2>
-              <Field label="Special instructions or notes" name="notes" placeholder="Any delivery notes, gift messages, etc." textarea />
+              <Field label="Special instructions or notes" name="notes" placeholder="Any delivery notes, gift messages, etc." textarea value={form.notes} onChange={handleChange} />
             </div>
 
             {/* Payment Method Selector */}

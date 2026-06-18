@@ -17,7 +17,7 @@ export default function ContactPage() {
 
   const contactMethods = [
     facebookUrl && { icon: Facebook, label: 'Facebook', value: 'Message Us', href: facebookUrl, color: '#1877f2' },
-    tiktokUrl && { icon: Music2,   label: 'TikTok',   value: 'Follow Us', href: tiktokUrl, color: '#000' },
+    tiktokUrl && { icon: Music2,   label: 'TikTok',   value: 'Follow Us', href: tiktokUrl, color: '#000000' },
     contactEmail && { icon: Mail,     label: 'Email',    value: contactEmail, href: `mailto:${contactEmail}`, color: '#e91e8c' },
     phone && { icon: Phone,    label: 'Phone',    value: phone, href: `tel:${phone}`, color: '#10b981' }
   ].filter(Boolean);

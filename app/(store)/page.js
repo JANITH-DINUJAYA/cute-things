@@ -116,7 +116,7 @@ export default async function HomePage() {
           <div style={{ maxWidth:1200, margin:'0 auto' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:48, flexWrap:'wrap', gap:16 }}>
               <div>
-                <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 8px' }}>
+                <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 2px' }}>
                   Featured <span className="gradient-brand-text">Products</span>
                 </h2>
                 <p style={{ color:'#6b7280', margin:0 }}>Our most loved items</p>

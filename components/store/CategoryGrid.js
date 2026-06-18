@@ -38,7 +38,7 @@ export default function CategoryGrid({ categories = [] }) {
   const displayed = expanded ? visibleCategories : visibleCategories.slice(0, ITEMS_PER_PAGE);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, width: '100%' }}>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
