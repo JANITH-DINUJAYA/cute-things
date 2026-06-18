@@ -89,5 +89,13 @@ service cloud.firestore {
       allow update, delete: if false; // Logs are immutable
     }
 
+    // ── Messages (Contact Form) ─────────────────────────────────────
+    match /messages/{messageId} {
+      allow create: if true;                 // Public — anyone can send a message
+      allow read:   if isStaff();            // Staff and above can read
+      allow update: if isStaff();            // Staff can mark read/unread
+      allow delete: if isAdmin();            // Admin+ can delete
+    }
+
   }
 }

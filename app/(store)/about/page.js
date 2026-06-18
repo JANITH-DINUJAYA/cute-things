@@ -35,7 +35,7 @@ export default function AboutPage() {
       </div>
 
       {/* Values */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 20, marginBottom: 40 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 20, marginBottom: 40 }}>
         {[
           { icon: Heart, title: 'Curated with Love',    desc: 'Every product is hand-picked for cuteness and quality', color: '#e91e8c' },
           { icon: Truck, title: 'Island-wide Delivery', desc: 'We deliver to every corner of Sri Lanka', color: '#3b82f6' },

@@ -5,12 +5,12 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingBag, Users,
-  Tag, TrendingUp, Shield, Settings, ChevronRight, X,
+  Tag, TrendingUp, Shield, Settings, ChevronRight, X, Mail,
 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 import { useState, useEffect } from 'react';
 
-const iconMap = { LayoutDashboard, Package, ShoppingBag, Users, Tag, TrendingUp, Shield, Settings };
+const iconMap = { LayoutDashboard, Package, ShoppingBag, Users, Tag, TrendingUp, Shield, Settings, Mail };
 
 const navItems = [
   { label: 'Dashboard',  href: '/admin',             icon: 'LayoutDashboard', permission: null              },
@@ -18,6 +18,7 @@ const navItems = [
   { label: 'Orders',     href: '/admin/orders',      icon: 'ShoppingBag',     permission: 'manageOrders'    },
   { label: 'Customers',  href: '/admin/customers',   icon: 'Users',           permission: 'manageCustomers' },
   { label: 'Categories', href: '/admin/categories',  icon: 'Tag',             permission: 'manageCategories'},
+  { label: 'Messages',   href: '/admin/messages',    icon: 'Mail',            permission: null              },
   { label: 'Marketing',  href: '/admin/marketing',   icon: 'TrendingUp',      permission: 'manageMarketing' },
   { label: 'Users',      href: '/admin/users',       icon: 'Shield',          permission: 'manageUsers'     },
   { label: 'Settings',   href: '/admin/settings',    icon: 'Settings',        permission: 'manageSettings'  },

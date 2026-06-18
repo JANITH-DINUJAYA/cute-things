@@ -11,7 +11,7 @@ export default function CategoriesPage() {
   const [modal,      setModal]      = useState(null); // null | 'new' | { category }
   const [confirm,    setConfirm]    = useState(null);
   const [saving,     setSaving]     = useState(false);
-  const [form,       setForm]       = useState({ name: '', isVisible: true, parentId: '', sortOrder: 0 });
+  const [form,       setForm]       = useState({ name: '', emoji: '', isVisible: true, parentId: '', sortOrder: 0 });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,6 +66,7 @@ export default function CategoriesPage() {
     try {
       const data = {
         name:       form.name.trim(),
+        emoji:      form.emoji.trim(),
         slug:       slugify(form.name),
         parentId:   form.parentId || null,
         isVisible:  form.isVisible,
@@ -78,7 +79,7 @@ export default function CategoriesPage() {
         await updateDoc(doc(db, 'categories', modal.id), data);
       }
       setModal(null);
-      setForm({ name: '', isVisible: true, parentId: '', sortOrder: 0 });
+      setForm({ name: '', emoji: '', isVisible: true, parentId: '', sortOrder: 0 });
       load();
     } finally { setSaving(false); }
   }
@@ -90,7 +91,7 @@ export default function CategoriesPage() {
   }
 
   function openEdit(cat) {
-    setForm({ name: cat.name, isVisible: cat.isVisible ?? true, parentId: cat.parentId || '', sortOrder: cat.sortOrder || 0 });
+    setForm({ name: cat.name, emoji: cat.emoji || '', isVisible: cat.isVisible ?? true, parentId: cat.parentId || '', sortOrder: cat.sortOrder || 0 });
     setModal(cat);
   }
 
@@ -104,7 +105,7 @@ export default function CategoriesPage() {
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Categories</h2>
           <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>{categories.length} categories</p>
         </div>
-        <button onClick={() => { setForm({ name: '', isVisible: true, parentId: '', sortOrder: 0 }); setModal('new'); }}
+        <button onClick={() => { setForm({ name: '', emoji: '', isVisible: true, parentId: '', sortOrder: 0 }); setModal('new'); }}
           className="btn-primary" style={{ padding: '10px 20px' }}>
           <Plus size={16} /> Add Category
         </button>
@@ -145,6 +146,10 @@ export default function CategoriesPage() {
               <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}><X size={20} /></button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Emoji (optional)</label>
+                <input value={form.emoji} onChange={(e) => setForm(f => ({ ...f, emoji: e.target.value }))} className="input" placeholder="e.g. 🧸" maxLength={4} style={{ maxWidth: 120 }} />
+              </div>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Name *</label>
                 <input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} className="input" placeholder="e.g. Plush Toys" />
@@ -207,7 +212,7 @@ function CategoryRow({ cat, onEdit, onDelete, isChild }) {
     }}>
       {isChild && <span style={{ marginRight: 8, color: '#d1d5db', fontSize: 18 }}>└</span>}
       <Tag size={16} color={isChild ? '#9ca3af' : '#e91e8c'} style={{ marginRight: 10, flexShrink: 0 }} />
-      <span style={{ flex: 1, fontSize: 14, fontWeight: isChild ? 400 : 600 }}>{cat.name}</span>
+      <span style={{ flex: 1, fontSize: 14, fontWeight: isChild ? 400 : 600 }}>{cat.emoji ? `${cat.emoji} ` : ''}{cat.name}</span>
       <span style={{ fontSize: 12, color: '#9ca3af', marginRight: 16 }}>/{cat.slug}</span>
       <span className={`badge badge-${cat.isVisible ? 'green' : 'gray'}`} style={{ fontSize: 11, marginRight: 12 }}>
         {cat.isVisible ? 'Visible' : 'Hidden'}

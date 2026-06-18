@@ -96,20 +96,10 @@ export default async function FeaturedPage() {
               </Link>
             </div>
 
-            {/* Featured grid — slightly larger cards with gold shadow */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: 28,
-            }}>
+            {/* Featured grid */}
+            <div className="product-grid">
               {featured.map((p) => (
-                <div key={p.id} style={{
-                  borderRadius: 16,
-                  boxShadow: '0 0 0 2px rgba(197,168,128,0.15), 0 8px 32px rgba(197,168,128,0.08)',
-                  transition: 'box-shadow 0.3s ease',
-                }}>
-                  <ProductCard product={p} />
-                </div>
+                <ProductCard key={p.id} product={p} />
               ))}
             </div>
           </>

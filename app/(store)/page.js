@@ -20,8 +20,8 @@ const features = [
 
 export default async function HomePage() {
   const [featured, newArrivals, dbCategories] = await Promise.all([
-    getFeaturedProducts(8),
-    getNewArrivals(8),
+    getFeaturedProducts(4),
+    getNewArrivals(4),
     getCategories(),
   ]);
 
@@ -78,7 +78,7 @@ export default async function HomePage() {
               {[
                 ['5000+', 'Happy Clients'],
                 ['50+', 'Boutique Products'],
-                ['⭐ 4.9', 'Client Rating']
+                ['4.9', 'Client Rating']
               ].map(([val, label]) => (
                 <div key={label}>
                   <div style={{ fontSize:26, fontWeight:700, fontFamily:'var(--font-sans)', color:'#c5a880', letterSpacing:'0.04em' }}>{val}</div>
@@ -153,6 +153,70 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ── Promotional Banner ──────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 80px', background: '#fff' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{
+            borderRadius: 24,
+            background: 'linear-gradient(135deg, #1e1a1d 0%, #2a1f2d 50%, #1e1a1d 100%)',
+            padding: 'clamp(36px,6vw,64px) clamp(24px,5vw,64px)',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 32,
+            flexWrap: 'wrap',
+          }}>
+            {/* Glow orbs */}
+            <div style={{ position:'absolute', top:'-40%', right:'10%', width:400, height:400, borderRadius:'50%', background:'radial-gradient(circle,rgba(197,168,128,.18) 0%,transparent 70%)', pointerEvents:'none' }} />
+            <div style={{ position:'absolute', bottom:'-30%', left:'5%', width:320, height:320, borderRadius:'50%', background:'radial-gradient(circle,rgba(233,30,140,.12) 0%,transparent 70%)', pointerEvents:'none' }} />
+
+            <div style={{ position:'relative', zIndex:1, flex:1, minWidth:260 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(197,168,128,0.15)', border:'1px solid rgba(197,168,128,0.3)', borderRadius:9999, padding:'5px 14px', marginBottom:16 }}>
+                <Gift size={12} color="#c5a880" />
+                <span style={{ fontSize:11, fontWeight:700, color:'#c5a880', letterSpacing:'0.08em', textTransform:'uppercase' }}>Special Offer</span>
+              </div>
+              <h2 style={{ fontSize:'clamp(24px,4vw,42px)', fontWeight:800, color:'#fff', margin:'0 0 12px', lineHeight:1.2 }}>
+                Free Island-Wide{' '}
+                <span style={{ background:'linear-gradient(135deg,#c5a880,#e5b3b3)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
+                  Delivery
+                </span>
+              </h2>
+              <p style={{ color:'rgba(255,255,255,.6)', fontSize:15, margin:'0 0 28px', lineHeight:1.7, maxWidth:480 }}>
+                On all orders across Sri Lanka. Shop our full collection of adorable plush toys, anime gifts &amp; accessories — and we'll deliver right to your door. 💌
+              </p>
+              <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+                <Link href="/shop" className="btn-gold" style={{ textDecoration:'none', fontSize:14, padding:'12px 28px' }}>
+                  Shop Now <ArrowRight size={16} />
+                </Link>
+                <Link href="/shop/featured" className="btn-outline" style={{ textDecoration:'none', fontSize:14, padding:'12px 28px', color:'rgba(255,255,255,.8)', borderColor:'rgba(255,255,255,.2)' }}>
+                  <Sparkles size={15} /> Featured Items
+                </Link>
+              </div>
+            </div>
+
+            <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', gap:16, alignItems:'flex-end', flexShrink:0 }}>
+              {[
+                { icon: Truck,    label: 'Island-wide shipping', sub: 'All 25 districts' },
+                { icon: Shield,   label: 'Cash on Delivery',     sub: 'Pay when received'  },
+                { icon: RefreshCw,label: 'Easy Returns',         sub: 'Hassle-free'         },
+              ].map(({ icon: Icon, label, sub }) => (
+                <div key={label} style={{ display:'flex', alignItems:'center', gap:12, background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'12px 18px', minWidth:220 }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:'rgba(197,168,128,.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <Icon size={17} color="#c5a880" />
+                  </div>
+                  <div>
+                    <p style={{ margin:0, fontSize:13, fontWeight:600, color:'#fff' }}>{label}</p>
+                    <p style={{ margin:0, fontSize:11, color:'rgba(255,255,255,.45)' }}>{sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ── Empty State ───────────────────────────────────────────────────── */}
       {featured.length === 0 && newArrivals.length === 0 && (

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Mail, Phone, Facebook, Music2, Send, CheckCircle } from 'lucide-react';
 import useSettingsStore from '@/store/settingsStore';
+import { db } from '@/lib/firebase/client';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function ContactPage() {
   const [form, setForm]       = useState({ name: '', email: '', message: '' });
@@ -25,10 +27,21 @@ export default function ContactPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    // Simple simulation — in production connect to Brevo or similar
-    await new Promise((r) => setTimeout(r, 1000));
-    setSent(true);
-    setLoading(false);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        name:      form.name.trim(),
+        email:     form.email.trim(),
+        message:   form.message.trim(),
+        status:    'unread',
+        createdAt: serverTimestamp(),
+      });
+      setSent(true);
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
