@@ -105,7 +105,6 @@ export default async function HomePage() {
             </h2>
             <p style={{ color:'#6b7280', fontSize:16 }}>Find exactly what you're looking for</p>
           </div>
-          
           <CategoryGrid categories={dbCategories} />
         </div>
       </section>
@@ -125,7 +124,7 @@ export default async function HomePage() {
                 View All <ArrowRight size={16} />
               </Link>
             </div>
-            <div className="product-grid">
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:24 }}>
               {featured.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
@@ -141,22 +140,22 @@ export default async function HomePage() {
                 <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 8px' }}>
                   New <span className="gradient-brand-text">Arrivals</span>
                 </h2>
-                <p style={{ color:'#6b7280', margin:0 }}>Fresh & adorable additions</p>
+                <p style={{ color:'#6b7280', margin:0 }}>Fresh &amp; adorable additions</p>
               </div>
               <Link href="/shop" className="btn-outline" style={{ textDecoration:'none' }}>
                 Shop All <ArrowRight size={16} />
               </Link>
             </div>
-            <div className="product-grid">
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:24 }}>
               {newArrivals.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── Promotional Banner ──────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 80px', background: '#fff' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      {/* ── Promotional Banner ────────────────────────────────────────────── */}
+      <section style={{ padding:'0 24px 80px', background:'#fff' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
           <div style={{
             borderRadius: 24,
             background: 'linear-gradient(135deg, #1e1a1d 0%, #2a1f2d 50%, #1e1a1d 100%)',
@@ -169,7 +168,6 @@ export default async function HomePage() {
             gap: 32,
             flexWrap: 'wrap',
           }}>
-            {/* Glow orbs */}
             <div style={{ position:'absolute', top:'-40%', right:'10%', width:400, height:400, borderRadius:'50%', background:'radial-gradient(circle,rgba(197,168,128,.18) 0%,transparent 70%)', pointerEvents:'none' }} />
             <div style={{ position:'absolute', bottom:'-30%', left:'5%', width:320, height:320, borderRadius:'50%', background:'radial-gradient(circle,rgba(233,30,140,.12) 0%,transparent 70%)', pointerEvents:'none' }} />
 
@@ -185,7 +183,7 @@ export default async function HomePage() {
                 </span>
               </h2>
               <p style={{ color:'rgba(255,255,255,.6)', fontSize:15, margin:'0 0 28px', lineHeight:1.7, maxWidth:480 }}>
-                On all orders across Sri Lanka. Shop our full collection of adorable plush toys, anime gifts &amp; accessories — and we'll deliver right to your door. 💌
+                On all orders across Sri Lanka. Shop our full collection of adorable plush toys, anime gifts &amp; accessories — delivered right to your door. 💌
               </p>
               <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
                 <Link href="/shop" className="btn-gold" style={{ textDecoration:'none', fontSize:14, padding:'12px 28px' }}>
@@ -197,11 +195,11 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', gap:16, alignItems:'flex-end', flexShrink:0 }}>
+            <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', gap:16, flexShrink:0 }}>
               {[
-                { icon: Truck,    label: 'Island-wide shipping', sub: 'All 25 districts' },
-                { icon: Shield,   label: 'Cash on Delivery',     sub: 'Pay when received'  },
-                { icon: RefreshCw,label: 'Easy Returns',         sub: 'Hassle-free'         },
+                { icon: Truck,     label: 'Island-wide shipping', sub: 'All 25 districts'  },
+                { icon: Shield,    label: 'Cash on Delivery',     sub: 'Pay when received' },
+                { icon: RefreshCw, label: 'Easy Returns',         sub: 'Hassle-free'       },
               ].map(({ icon: Icon, label, sub }) => (
                 <div key={label} style={{ display:'flex', alignItems:'center', gap:12, background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'12px 18px', minWidth:220 }}>
                   <div style={{ width:36, height:36, borderRadius:10, background:'rgba(197,168,128,.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -218,7 +216,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Empty State ───────────────────────────────────────────────────── */}
+      {/* ── Empty State (shown only when no products at all) ───────────────── */}
       {featured.length === 0 && newArrivals.length === 0 && (
         <section style={{ padding:'80px 24px', textAlign:'center' }}>
           <div style={{ maxWidth:480, margin:'0 auto' }}>
@@ -231,27 +229,8 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── Features Strip ────────────────────────────────────────────────── */}
-      <section style={{ padding:'64px 24px', background:'linear-gradient(135deg,#1e1a1d,#120f11)' }}>
-        <div style={{ maxWidth:1200, margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:32 }}>
-          {features.map(({ icon: Icon, title, desc }) => (
-            <div key={title} style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', gap:12 }}>
-              <div style={{
-                width:52, height:52, borderRadius:14,
-                background:'rgba(197,168,128,.15)', border:'1px solid rgba(197,168,128,.25)',
-                display:'flex', alignItems:'center', justifyContent:'center',
-              }}>
-                <Icon size={22} color="#c5a880" />
-              </div>
-              <h3 style={{ color:'#fff', fontWeight:500, letterSpacing:'0.04em', fontSize:16, margin:0 }}>{title}</h3>
-              <p style={{ color:'rgba(255,255,255,.5)', fontSize:13, margin:0 }}>{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── TikTok CTA ────────────────────────────────────────────────────────── */}
-      <section style={{ padding:'80px 24px', background:'#fff', textAlign:'center' }}>
+      {/* ── TikTok CTA (light bg — breaks dark sections) ──────────────────── */}
+      <section style={{ padding:'80px 24px', background:'#faf8f6', textAlign:'center' }}>
         <div style={{ maxWidth:600, margin:'0 auto' }}>
           <div style={{ width:64, height:64, borderRadius:'50%', background:'linear-gradient(135deg,#1e1a1d,#333)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
@@ -272,6 +251,25 @@ export default async function HomePage() {
           >
             Follow @cute.things516
           </a>
+        </div>
+      </section>
+
+      {/* ── Features Strip (dark) ──────────────────────────────────────────── */}
+      <section style={{ padding:'64px 24px', background:'linear-gradient(135deg,#1e1a1d,#120f11)' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:32 }}>
+          {features.map(({ icon: Icon, title, desc }) => (
+            <div key={title} style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', gap:12 }}>
+              <div style={{
+                width:52, height:52, borderRadius:14,
+                background:'rgba(197,168,128,.15)', border:'1px solid rgba(197,168,128,.25)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+              }}>
+                <Icon size={22} color="#c5a880" />
+              </div>
+              <h3 style={{ color:'#fff', fontWeight:500, letterSpacing:'0.04em', fontSize:16, margin:0 }}>{title}</h3>
+              <p style={{ color:'rgba(255,255,255,.5)', fontSize:13, margin:0 }}>{desc}</p>
+            </div>
+          ))}
         </div>
       </section>
     </>
