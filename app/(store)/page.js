@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getFeaturedProducts, getNewArrivals, getCategories } from '@/lib/firebase/server';
+import { getFeaturedProducts, getNewArrivals, getCategories, getGeneralSettings } from '@/lib/firebase/server';
 import ProductCard from '@/components/store/ProductCard';
 import CategoryGrid from '@/components/store/CategoryGrid';
 import { ArrowRight, Truck, Shield, RefreshCw, Star, Heart, Sparkles, Gift, Gem, ShoppingBag } from 'lucide-react';
@@ -19,11 +19,15 @@ const features = [
 ];
 
 export default async function HomePage() {
-  const [featured, newArrivals, dbCategories] = await Promise.all([
+  const [featured, newArrivals, dbCategories, settings] = await Promise.all([
     getFeaturedProducts(4),
     getNewArrivals(4),
     getCategories(),
+    getGeneralSettings(),
   ]);
+
+  const rawVideoIds = settings?.tiktokVideoIds || '7304193566113942817,7318049187313651970,7402097063462833441';
+  const tiktokVideos = rawVideoIds.split(',').map(id => id.trim()).filter(Boolean);
 
   const floatingIcons = [Heart, Sparkles, Gift, Star, Gem, ShoppingBag];
 
@@ -231,16 +235,52 @@ export default async function HomePage() {
 
       {/* ── TikTok CTA (light bg — breaks dark sections) ──────────────────── */}
       <section style={{ padding:'80px 24px', background:'#faf8f6', textAlign:'center' }}>
-        <div style={{ maxWidth:600, margin:'0 auto' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
           <div style={{ width:64, height:64, borderRadius:'50%', background:'linear-gradient(135deg,#1e1a1d,#333)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
           </div>
           <h2 style={{ fontSize:'clamp(24px,4vw,38px)', fontWeight:800, margin:'0 0 16px' }}>
             Follow us on <span className="gradient-brand-text">TikTok</span>
           </h2>
-          <p style={{ color:'#6b7280', fontSize:16, marginBottom:32 }}>
-            Watch our unboxing videos, cute product showcases, and more on TikTok @cute.things516
+          <p style={{ color:'#6b7280', fontSize:16, marginBottom:40, maxWidth:600, margin:'0 auto' }}>
+            Watch our unboxing videos and cute product showcases directly below, or follow us @cute.things516!
           </p>
+
+          {/* TikTok Embed Grid */}
+          {tiktokVideos.length > 0 && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(325px, 1fr))',
+              gap: 24,
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: '32px auto 48px',
+              maxWidth: 1100,
+            }}>
+              {tiktokVideos.map((id) => (
+                <div key={id} style={{
+                  background: '#fff',
+                  borderRadius: 16,
+                  padding: 10,
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.03)',
+                  border: '1px solid #eae3dc',
+                  height: 580,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                  <iframe
+                    src={`https://www.tiktok.com/embed/v2/${id}`}
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
           <a
             href="https://www.tiktok.com/@cute.things516"
             target="_blank"

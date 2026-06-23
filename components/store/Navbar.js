@@ -3,10 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { ShoppingCart, Menu, X, Star, Truck } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ShoppingCart, Menu, X, Star, Truck, User, LogOut } from 'lucide-react';
 import useCartStore from '@/store/cartStore';
 import useSettingsStore from '@/store/settingsStore';
+import useAuthStore from '@/store/authStore';
+import { auth } from '@/lib/firebase/client';
+import { signOut } from 'firebase/auth';
 
 const NAV_LINKS = [
   { label: 'Home',    href: '/'       },
@@ -17,10 +20,16 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const pathname   = usePathname();
+  const router     = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const itemCount  = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0));
   const siteName   = useSettingsStore((s) => s.general.siteName) || 'Cute Things';
+  const { user, clearAuth } = useAuthStore();
+
+  const activeLinks = user
+    ? [...NAV_LINKS, { label: 'Track Order', href: '/track-order' }]
+    : NAV_LINKS;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -80,7 +89,7 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <nav style={{ display: 'flex', gap: 4, alignItems: 'center', marginRight: 16 }} className="hidden-mobile">
-            {NAV_LINKS.map((link) => (
+            {activeLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -146,6 +155,52 @@ export default function Navbar() {
               )}
             </Link>
 
+            {/* Auth section */}
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  height: 42, borderRadius: 12,
+                  border: '1.5px solid #f0f0f0', background: '#faf8f6',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 12px', gap: 6, fontSize: 13, fontWeight: 600, color: '#c5a880',
+                }}>
+                  <User size={16} />
+                  <span style={{ maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="hidden-mobile">
+                    {user.displayName || 'User'}
+                  </span>
+                </div>
+                <button
+                  onClick={async () => {
+                    await signOut(auth);
+                    clearAuth();
+                    router.push('/');
+                  }}
+                  style={{
+                    width: 42, height: 42, borderRadius: 12,
+                    border: '1.5px solid #f0f0f0', background: '#fff',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,.04)',
+                  }}
+                  title="Sign Out"
+                >
+                  <LogOut size={16} color="#dc2626" />
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" style={{ textDecoration: 'none' }} id="login-link">
+                <button style={{
+                  height: 42, borderRadius: 12,
+                  border: '1.5px solid #f0f0f0', background: '#fff',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 16px', gap: 8, fontSize: 13, fontWeight: 600, color: '#374151',
+                  transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,.04)',
+                }} className="nav-login-btn">
+                  <User size={16} />
+                  <span className="hidden-mobile">Sign In</span>
+                </button>
+              </Link>
+            )}
+
             {/* Mobile menu toggle */}
             <button
               id="mobile-menu-toggle"
@@ -178,7 +233,7 @@ export default function Navbar() {
             boxShadow: '0 8px 32px rgba(0,0,0,.1)',
             display: 'flex', flexDirection: 'column', gap: 4,
           }}>
-            {NAV_LINKS.map((link) => (
+            {activeLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

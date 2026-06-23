@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import useCartStore from '@/store/cartStore';
 import useSettingsStore from '@/store/settingsStore';
+import useAuthStore from '@/store/authStore';
 import { ArrowLeft, CheckCircle, Truck, User, Phone, MapPin, FileText, AlertCircle, Tag, Landmark, CreditCard, Upload, Package, LockKeyhole, ImageIcon } from 'lucide-react';
 
 function Field({ label, name, type = 'text', placeholder, required, textarea, value, onChange }) {
@@ -29,6 +30,7 @@ export default function CheckoutPage() {
   const router   = useRouter();
   const items    = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clearCart);
+  const { user, loading: authLoading } = useAuthStore();
 
   const shippingSettings = useSettingsStore((s) => s.shipping);
   const defaultFee = shippingSettings?.defaultFee ?? 350;
@@ -67,6 +69,16 @@ export default function CheckoutPage() {
     name: '', email: '', phone: '',
     address: '', city: '', postalCode: '', notes: '',
   });
+
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        name: f.name || user.displayName || '',
+        email: f.email || user.email || '',
+      }));
+    }
+  }, [user]);
   
   // Payment States
   const [paymentMethod, setPaymentMethod] = useState('cod');
@@ -92,6 +104,38 @@ export default function CheckoutPage() {
         </div>
         <h2 style={{ fontWeight: 800 }}>Your cart is empty</h2>
         <Link href="/shop" className="btn-gold" style={{ textDecoration: 'none' }}>Back to Shop</Link>
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <div style={{ width: 40, height: 40, border: '3px solid rgba(197, 168, 128, 0.2)', borderTop: '3px solid #c5a880', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <p style={{ color: '#6b7280', fontSize: 14 }}>Verifying account...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ maxWidth: 500, margin: '80px auto', padding: '0 24px', textAlign: 'center' }}>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(197,168,128,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#c5a880' }}>
+          <LockKeyhole size={32} />
+        </div>
+        <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 12, fontFamily: 'var(--font-serif)' }}>Sign In Required</h2>
+        <p style={{ color: '#6b7280', fontSize: 15, lineHeight: 1.7, marginBottom: 32 }}>
+          You must be logged in to place an order. Creating an account is quick, secure, and lets you track your package, view your history, and get delivery updates.
+        </p>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href={`/login?redirect=/checkout`} className="btn-gold" style={{ textDecoration: 'none', padding: '14px 28px' }}>
+            Sign In / Register
+          </Link>
+          <Link href="/cart" className="btn-outline" style={{ textDecoration: 'none', padding: '14px 28px', color: '#1e1a1d', borderColor: '#eae3dc' }}>
+            Back to Cart
+          </Link>
+        </div>
       </div>
     );
   }
@@ -153,9 +197,13 @@ export default function CheckoutPage() {
     }
 
     try {
+      const idToken = await user.getIdToken();
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
         body: JSON.stringify({
           customer:    form,
           items:       items.map((i) => ({ productId: i.id, name: i.name, price: i.price, qty: i.quantity, image: i.image })),

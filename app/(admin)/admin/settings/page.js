@@ -23,6 +23,7 @@ export default function SettingsPage() {
     address: '',
     facebookUrl: '',
     tiktokUrl: '',
+    tiktokVideoIds: '7304193566113942817,7318049187313651970,7402097063462833441',
     maintenanceMode: false
   });
 
@@ -253,6 +254,19 @@ export default function SettingsPage() {
                     placeholder="https://tiktok.com/@..."
                   />
                 </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1e1a1d', marginBottom: 6 }}>TikTok Video IDs (Comma Separated)</label>
+                <input
+                  value={general.tiktokVideoIds || ''}
+                  onChange={(e) => setGeneral((g) => ({ ...g, tiktokVideoIds: e.target.value }))}
+                  disabled={!isSuper}
+                  className="input"
+                  placeholder="e.g. 7304193566113942817, 7318049187313651970, 7402097063462833441"
+                />
+                <p style={{ margin: '4px 0 0', fontSize: 11, color: '#6b7280' }}>
+                  Provide up to 3 TikTok video IDs. They will display as playable embedded video players on the homepage.
+                </p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
                 <input

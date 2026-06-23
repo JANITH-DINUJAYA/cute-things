@@ -1,12 +1,76 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb, adminAuth } from '@/lib/firebase/admin';
 import { sendOrderConfirmation, sendAdminNewOrderAlert } from '@/lib/email';
 
 /**
+ * GET /api/orders
+ * Returns all orders belonging to the logged-in customer.
+ * Requires: Bearer token in Authorization header.
+ */
+export async function GET(request) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized: Missing session token' }, { status: 401 });
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+    let uid;
+    try {
+      const decoded = await adminAuth.verifyIdToken(token);
+      uid = decoded.uid;
+    } catch (err) {
+      return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
+    }
+
+    // Query orders belonging to this user
+    const snap = await adminDb.collection('orders')
+      .where('userId', '==', uid)
+      .get();
+
+    const orders = snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id:          d.id,
+        orderNumber: data.orderNumber ?? '',
+        customer:    data.customer   ?? {},
+        items:       data.items      ?? [],
+        subtotal:    data.subtotal   ?? 0,
+        discount:    data.discount   ?? 0,
+        shippingFee: data.shippingFee ?? 0,
+        total:       data.total      ?? 0,
+        status:      data.status     ?? 'pending',
+        paymentMethod: data.paymentMethod ?? 'cod',
+        paymentSlipUrl: data.paymentSlipUrl ?? null,
+        isPaid:      data.isPaid     ?? false,
+        notes:       data.notes      ?? '',
+        statusHistory: (data.statusHistory ?? []).map((h) => ({
+          ...h,
+          changedAt: h.changedAt?.toDate?.()?.toISOString() ?? null,
+        })),
+        createdAt:   data.createdAt?.toDate?.()?.toISOString() ?? null,
+        updatedAt:   data.updatedAt?.toDate?.()?.toISOString() ?? null,
+      };
+    });
+
+    // Sort by date descending
+    orders.sort((a, b) => {
+      if (!a.createdAt) return 1;
+      if (!b.createdAt) return -1;
+      return b.createdAt.localeCompare(a.createdAt);
+    });
+
+    return NextResponse.json({ orders });
+  } catch (err) {
+    console.error('[GET /api/orders] Error:', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+/**
  * POST /api/orders
- *
- * Creates a new order in Firestore (via Admin SDK — no client access).
- * Sends confirmation email to customer and alert to admin.
+ * Creates a new order in Firestore (via Admin SDK).
+ * Requires: Bearer token in Authorization header.
  *
  * Body: {
  *   customer: { name, email, phone, address, city, postalCode, notes? },
@@ -16,6 +80,20 @@ import { sendOrderConfirmation, sendAdminNewOrderAlert } from '@/lib/email';
  */
 export async function POST(request) {
   try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized: Log in is required to place an order.' }, { status: 401 });
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+    let userId;
+    try {
+      const decoded = await adminAuth.verifyIdToken(token);
+      userId = decoded.uid;
+    } catch (err) {
+      return NextResponse.json({ error: 'Unauthorized: Invalid session. Please log in again.' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { customer, items, couponCode, paymentMethod = 'cod', paymentSlipUrl = null, isPaid = false } = body;
 
@@ -66,6 +144,7 @@ export async function POST(request) {
 
     const order = {
       orderNumber,
+      userId,
       customer,
       items,
       subtotal,
@@ -103,15 +182,14 @@ export async function POST(request) {
     await stockBatch.commit();
 
     // ── Upsert customer record ───────────────────────────────────────
-    const customerRef = adminDb.collection('customers').doc(
-      customer.email.replace(/[.@]/g, '_')
-    );
+    const customerRef = adminDb.collection('customers').doc(userId);
     const customerSnap = await customerRef.get();
     if (customerSnap.exists) {
       await customerRef.update({
         orderCount:  FieldValue.increment(1),
         totalSpent:  FieldValue.increment(total),
         lastOrderAt: new Date(),
+        updatedAt:   new Date(),
       });
     } else {
       await customerRef.set({
@@ -123,6 +201,7 @@ export async function POST(request) {
         notes:       '',
         createdAt:   new Date(),
         lastOrderAt: new Date(),
+        updatedAt:   new Date(),
       });
     }
 

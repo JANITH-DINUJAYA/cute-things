@@ -75,6 +75,13 @@ export async function PATCH(request) {
       return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
     }
 
+    const orderRef = adminDb.collection('orders').doc(orderId);
+    const orderSnap = await orderRef.get();
+    if (!orderSnap.exists) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+    const order = orderSnap.data();
+
     const { FieldValue } = await import('firebase-admin/firestore');
     const updateData = { updatedAt: new Date() };
 
@@ -91,7 +98,18 @@ export async function PATCH(request) {
       updateData.isPaid = isPaid;
     }
 
-    await adminDb.collection('orders').doc(orderId).update(updateData);
+    await orderRef.update(updateData);
+
+    // Send email to customer on status update
+    if (status !== undefined && order.status !== status) {
+      try {
+        const { sendOrderStatusUpdate } = await import('@/lib/email');
+        const updatedOrder = { ...order, ...updateData };
+        await sendOrderStatusUpdate(updatedOrder, status);
+      } catch (emailErr) {
+        console.error('[PATCH /api/admin/orders] Email failed:', emailErr);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
