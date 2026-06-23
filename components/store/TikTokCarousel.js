@@ -3,6 +3,26 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+/**
+ * Converts a Cloudinary player embed URL into a direct .mp4 URL.
+ * e.g. https://player.cloudinary.com/embed/?cloud_name=abc&public_id=xyz
+ *   → https://res.cloudinary.com/abc/video/upload/xyz.mp4
+ * All other URLs are returned as-is.
+ */
+function normalizeVideoUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === 'player.cloudinary.com') {
+      const cloudName = parsed.searchParams.get('cloud_name');
+      const publicId  = parsed.searchParams.get('public_id');
+      if (cloudName && publicId) {
+        return `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`;
+      }
+    }
+  } catch (_) { /* not a valid URL, fall through */ }
+  return url;
+}
+
 export default function TikTokCarousel({ videos = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -67,7 +87,7 @@ export default function TikTokCarousel({ videos = [] }) {
                 position: 'relative',
               }}>
                 <video
-                  src={url}
+                  src={normalizeVideoUrl(url)}
                   controls
                   loop
                   muted

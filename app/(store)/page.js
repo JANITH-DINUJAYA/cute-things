@@ -129,7 +129,7 @@ export default async function HomePage() {
                 View All <ArrowRight size={16} />
               </Link>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:24 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:24 }}>
               {featured.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
@@ -151,7 +151,7 @@ export default async function HomePage() {
                 Shop All <ArrowRight size={16} />
               </Link>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:24 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:24 }}>
               {newArrivals.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
