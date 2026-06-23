@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getFeaturedProducts, getNewArrivals, getCategories, getGeneralSettings } from '@/lib/firebase/server';
 import ProductCard from '@/components/store/ProductCard';
 import CategoryGrid from '@/components/store/CategoryGrid';
+import TikTokCarousel from '@/components/store/TikTokCarousel';
 import { ArrowRight, Truck, Shield, RefreshCw, Star, Heart, Sparkles, Gift, Gem, ShoppingBag } from 'lucide-react';
 
 export const metadata = {
@@ -246,40 +247,10 @@ export default async function HomePage() {
             Watch our unboxing videos and cute product showcases directly below, or follow us @cute.things516!
           </p>
 
-          {/* TikTok Embed Grid */}
-          {tiktokVideos.length > 0 && (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(325px, 1fr))',
-              gap: 24,
-              justifyContent: 'center',
-              alignItems: 'center',
-              margin: '32px auto 48px',
-              maxWidth: 1100,
-            }}>
-              {tiktokVideos.map((id) => (
-                <div key={id} style={{
-                  background: '#fff',
-                  borderRadius: 16,
-                  padding: 10,
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.03)',
-                  border: '1px solid #eae3dc',
-                  height: 580,
-                  overflow: 'hidden',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                  <iframe
-                    src={`https://www.tiktok.com/embed/v2/${id}`}
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          {/* TikTok Embed Slider */}
+          <div style={{ margin: '32px 0 48px' }}>
+            <TikTokCarousel videos={tiktokVideos} />
+          </div>
 
           <a
             href="https://www.tiktok.com/@cute.things516"
