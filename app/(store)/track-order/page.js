@@ -103,7 +103,7 @@ export default function TrackOrderPage() {
 
   if (!user) {
     return (
-      <div style={{ maxWidth: 500, margin: '80px auto', padding: '0 24px', textAlign: 'center' }}>
+      <div style={{ maxWidth: 500, margin: '0 auto', padding: 'clamp(48px, 8vh, 96px) 24px', textAlign: 'center', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(197,168,128,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', color: '#c5a880' }}>
           <Lock size={32} />
         </div>
@@ -127,9 +127,9 @@ export default function TrackOrderPage() {
   const isCancelled = selectedOrder?.status === 'cancelled';
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '48px 24px', minHeight: '80vh' }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(24px, 5vw, 48px) clamp(12px, 4vw, 24px)', minHeight: '80vh' }}>
       {/* Header */}
-      <div style={{ marginBottom: 40 }}>
+      <div style={{ marginBottom: 'clamp(24px, 5vw, 40px)' }}>
         <h1 style={{ fontSize: 'clamp(28px,5vw,42px)', fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-serif)' }}>
           Track Your <span className="gradient-brand-text">Orders</span>
         </h1>
@@ -207,12 +207,12 @@ export default function TrackOrderPage() {
 
           {/* Right panel: Active order details & stepper */}
           {selectedOrder && (
-            <div className="card" style={{ padding: '32px 28px', background: '#fff', border: '1px solid #eae3dc', borderRadius: 20, boxShadow: '0 8px 30px rgba(0,0,0,0.02)' }}>
+            <div className="card tracking-details-card" style={{ background: '#fff', border: '1px solid #eae3dc', borderRadius: 20, boxShadow: '0 8px 30px rgba(0,0,0,0.02)' }}>
               
               {/* Stepper Timeline */}
               {!isCancelled ? (
                 <div style={{ marginBottom: 40 }}>
-                  <h4 style={{ margin: '0 0 24px', fontSize: 15, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <h4 style={{ margin: '0 0 24px', fontSize: 15, fontWeight: 700, color: '#88', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     Delivery Progress
                   </h4>
                   {/* Stepper Line wrapper */}
@@ -232,18 +232,28 @@ export default function TrackOrderPage() {
                       const isActive = step.step <= currentStep;
                       return (
                         <div key={step.step} style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <div style={{
-                            width: 32, height: 32, borderRadius: '50%',
-                            background: isActive ? '#fff' : '#fff',
-                            border: isActive ? '3.5px solid #c5a880' : '3.5px solid #e5e7eb',
-                            boxShadow: isActive ? '0 4px 10px rgba(197, 168, 128, 0.3)' : 'none',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: isActive ? '#c5a880' : '#9ca3af',
-                            fontWeight: 700, fontSize: 12, transition: 'all 0.3s ease'
-                          }}>
-                            {isActive ? <CheckCircle2 size={16} color="#c5a880" fill="#fff" /> : step.step}
+                          <div
+                            className="stepper-circle"
+                            style={{
+                              borderRadius: '50%',
+                              background: '#fff',
+                              borderStyle: 'solid',
+                              borderColor: isActive ? '#c5a880' : '#e5e7eb',
+                              boxShadow: isActive ? '0 4px 10px rgba(197, 168, 128, 0.3)' : 'none',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: isActive ? '#c5a880' : '#9ca3af',
+                              fontWeight: 700, transition: 'all 0.3s ease'
+                            }}
+                          >
+                            {isActive ? <CheckCircle2 className="stepper-check-icon" color="#c5a880" fill="#fff" /> : step.step}
                           </div>
-                          <span style={{ fontSize: 11, fontWeight: isActive ? 700 : 500, color: isActive ? '#c5a880' : '#9ca3af', marginTop: 8, whiteSpace: 'nowrap' }}>
+                          <span
+                            className="stepper-label"
+                            style={{
+                              fontWeight: isActive ? 700 : 500,
+                              color: isActive ? '#c5a880' : '#9ca3af',
+                            }}
+                          >
                             {step.label}
                           </span>
                         </div>
@@ -365,14 +375,55 @@ export default function TrackOrderPage() {
       )}
 
       <style>{`
+        .tracking-details-card {
+          padding: 32px 28px;
+        }
+        .stepper-circle {
+          width: 32px;
+          height: 32px;
+          border-width: 3.5px;
+          font-size: 12px;
+        }
+        .stepper-check-icon {
+          width: 16px;
+          height: 16px;
+        }
+        .stepper-label {
+          font-size: 11px;
+          margin-top: 8px;
+          white-space: nowrap;
+          text-align: center;
+        }
         @media(max-width: 768px) {
           .tracking-layout {
             grid-template-columns: 1fr !important;
-            gap: 40px !important;
+            gap: 24px !important;
           }
           .details-grid-2 {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
+          }
+        }
+        @media(max-width: 640px) {
+          .tracking-details-card {
+            padding: 20px 16px !important;
+          }
+          .stepper-circle {
+            width: 24px !important;
+            height: 24px !important;
+            border-width: 2.5px !important;
+            font-size: 10px !important;
+          }
+          .stepper-check-icon {
+            width: 12px !important;
+            height: 12px !important;
+          }
+          .stepper-label {
+            font-size: 9px !important;
+            margin-top: 6px !important;
+            white-space: normal !important;
+            max-width: 55px !important;
+            line-height: 1.1 !important;
           }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
