@@ -12,6 +12,7 @@ const ALL_PERMISSIONS = [
   { key: 'manageOrders',     label: 'Manage Orders'     },
   { key: 'manageCustomers',  label: 'Manage Customers'  },
   { key: 'manageCategories', label: 'Manage Categories' },
+  { key: 'manageMessages',   label: 'Manage Messages'   },
   { key: 'viewReports',      label: 'View Reports'      },
   { key: 'manageMarketing',  label: 'Manage Marketing'  },
   { key: 'manageSettings',   label: 'Manage Settings'   },

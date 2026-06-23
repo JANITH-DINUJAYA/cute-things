@@ -23,7 +23,7 @@ export default function SettingsPage() {
     address: '',
     facebookUrl: '',
     tiktokUrl: '',
-    tiktokVideoIds: '7304193566113942817,7318049187313651970,7402097063462833441',
+    videoUrls: 'https://assets.mixkit.co/videos/preview/mixkit-gift-boxes-in-different-colors-41680-large.mp4, https://assets.mixkit.co/videos/preview/mixkit-unboxing-a-gift-box-41688-large.mp4, https://assets.mixkit.co/videos/preview/mixkit-dresses-on-a-hanger-in-a-store-42211-large.mp4',
     maintenanceMode: false
   });
 
@@ -256,16 +256,18 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1e1a1d', marginBottom: 6 }}>TikTok Video IDs (Comma Separated)</label>
-                <input
-                  value={general.tiktokVideoIds || ''}
-                  onChange={(e) => setGeneral((g) => ({ ...g, tiktokVideoIds: e.target.value }))}
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1e1a1d', marginBottom: 6 }}>Promo Video URLs (Direct MP4 Links, Comma Separated)</label>
+                <textarea
+                  value={general.videoUrls || ''}
+                  onChange={(e) => setGeneral((g) => ({ ...g, videoUrls: e.target.value }))}
                   disabled={!isSuper}
                   className="input"
-                  placeholder="e.g. 7304193566113942817, 7318049187313651970, 7402097063462833441"
+                  rows={3}
+                  style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                  placeholder="e.g. https://example.com/video1.mp4, https://example.com/video2.mp4"
                 />
                 <p style={{ margin: '4px 0 0', fontSize: 11, color: '#6b7280' }}>
-                  Provide up to 3 TikTok video IDs. They will display as playable embedded video players on the homepage.
+                  Provide direct URLs to MP4 video files. You can host files for free on Cloudinary, Discord, GitHub, or OneDrive, and paste the direct URLs here to display them in the homepage player.
                 </p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>

@@ -41,9 +41,9 @@ export default function TikTokCarousel({ videos = [] }) {
           transform: `translateX(-${currentIndex * (isMobile ? 100 : (100 / visibleItems)) }%)`,
           transition: 'transform 0.4s ease-in-out',
         }} className="tiktok-slider-row">
-          {videos.map((id) => (
+          {videos.map((url, idx) => (
             <div
-              key={id}
+              key={idx}
               style={{
                 flex: isMobile ? '0 0 100%' : `0 0 calc(${100 / visibleItems}% - 14px)`,
                 display: 'flex',
@@ -51,27 +51,34 @@ export default function TikTokCarousel({ videos = [] }) {
                 boxSizing: 'border-box',
               }}
             >
-              {/* Compact Video Card */}
+              {/* Compact Video Card (Phone Preview Shell) */}
               <div style={{
-                background: '#fff',
-                borderRadius: 20,
-                padding: 10,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.03)',
-                border: '1px solid #eae3dc',
+                background: '#000',
+                borderRadius: 24,
+                boxShadow: '0 12px 32px rgba(0,0,0,0.15)',
+                border: '4px solid #1e1a1d',
                 height: 440,
                 width: '100%',
-                maxWidth: 280,
+                maxWidth: 260,
                 overflow: 'hidden',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 position: 'relative',
               }}>
-                <iframe
-                  src={`https://www.tiktok.com/player/v1/${id}`}
-                  style={{ width: '100%', height: '100%', border: 'none', borderRadius: 14 }}
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
+                <video
+                  src={url}
+                  controls
+                  loop
+                  muted
+                  playsInline
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: 18,
+                    background: '#000',
+                  }}
                 />
               </div>
             </div>

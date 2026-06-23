@@ -27,8 +27,8 @@ export default async function HomePage() {
     getGeneralSettings(),
   ]);
 
-  const rawVideoIds = settings?.tiktokVideoIds || '7304193566113942817,7318049187313651970,7402097063462833441';
-  const tiktokVideos = rawVideoIds.split(',').map(id => id.trim()).filter(Boolean);
+  const rawVideoUrls = settings?.videoUrls || 'https://assets.mixkit.co/videos/preview/mixkit-gift-boxes-in-different-colors-41680-large.mp4, https://assets.mixkit.co/videos/preview/mixkit-unboxing-a-gift-box-41688-large.mp4, https://assets.mixkit.co/videos/preview/mixkit-dresses-on-a-hanger-in-a-store-42211-large.mp4';
+  const promoVideos = rawVideoUrls.split(',').map(url => url.trim()).filter(Boolean);
 
   const floatingIcons = [Heart, Sparkles, Gift, Star, Gem, ShoppingBag];
 
@@ -249,7 +249,7 @@ export default async function HomePage() {
 
           {/* TikTok Embed Slider */}
           <div style={{ margin: '32px 0 48px' }}>
-            <TikTokCarousel videos={tiktokVideos} />
+            <TikTokCarousel videos={promoVideos} />
           </div>
 
           <a

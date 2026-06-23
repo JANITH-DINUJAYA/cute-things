@@ -6,15 +6,20 @@ import {
   collection, getDocs, updateDoc, deleteDoc, doc,
   query, orderBy,
 } from 'firebase/firestore';
-import { Mail, MailOpen, Trash2, RefreshCw, Eye, X } from 'lucide-react';
+import { Mail, MailOpen, Trash2, RefreshCw, Eye, X, Shield } from 'lucide-react';
+import useAuthStore from '@/store/authStore';
 
 export default function MessagesPage() {
+  const { hasPermission } = useAuthStore();
+  const canManage = hasPermission('manageMessages');
+
   const [messages, setMessages] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [selected, setSelected] = useState(null); // message being viewed
   const [deleting, setDeleting] = useState(null); // id to confirm delete
 
   const load = useCallback(async () => {
+    if (!canManage) return;
     setLoading(true);
     try {
       const snap = await getDocs(query(collection(db, 'messages'), orderBy('createdAt', 'desc')));
@@ -48,6 +53,16 @@ export default function MessagesPage() {
 
   const unread = messages.filter((m) => m.status === 'unread');
   const read   = messages.filter((m) => m.status !== 'unread');
+
+  if (!canManage) {
+    return (
+      <div style={{ textAlign: 'center', padding: '80px 24px' }}>
+        <Shield size={48} style={{ color: '#e91e8c', marginBottom: 16 }} />
+        <h2>Access Restricted</h2>
+        <p style={{ color: '#6b7280' }}>You do not have permission to manage inbox messages.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
