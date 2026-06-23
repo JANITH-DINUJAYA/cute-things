@@ -75,14 +75,14 @@ export default function Navbar() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: 68 }}>
 
           {/* Logo */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', flex: 1 }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', flex: 1, minWidth: 0 }}>
             <Image
               src="/logo.jpg"
               alt={`${siteName} Logo`}
               width={42} height={42}
-              style={{ borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(197,168,128,0.2)', boxShadow: '0 2px 8px rgba(197,168,128,0.15)' }}
+              style={{ borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(197,168,128,0.2)', boxShadow: '0 2px 8px rgba(197,168,128,0.15)', flexShrink: 0 }}
             />
-            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--font-serif)', color: '#1e1a1d' }}>
+            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--font-serif)', color: '#1e1a1d', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {siteName}
             </span>
           </Link>
@@ -131,7 +131,7 @@ export default function Navbar() {
           </nav>
 
           {/* Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             {/* Cart */}
             <Link href="/cart" id="cart-link" style={{ position: 'relative', textDecoration: 'none' }}>
               <button style={{
