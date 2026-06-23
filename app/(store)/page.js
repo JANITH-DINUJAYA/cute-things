@@ -83,7 +83,7 @@ export default async function HomePage() {
               {[
                 ['5000+', 'Happy Clients'],
                 ['50+', 'Boutique Products'],
-                ['4.9★', 'Client Rating']
+                ['4.9', 'Client Rating']
               ].map(([val, label]) => (
                 <div key={label}>
                   <div style={{ fontSize:'clamp(20px,4vw,26px)', fontWeight:700, fontFamily:'var(--font-sans)', color:'#c5a880', letterSpacing:'0.04em' }}>{val}</div>

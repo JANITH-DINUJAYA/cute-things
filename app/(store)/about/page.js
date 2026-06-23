@@ -39,7 +39,7 @@ export default function AboutPage() {
         {[
           { value: '5000+', label: 'Happy Customers', icon: Users },
           { value: '50+',   label: 'Cute Products',   icon: Gift },
-          { value: '4.9★',  label: 'Customer Rating', icon: Award },
+          { value: '4.9',  label: 'Customer Rating', icon: Award },
         ].map(({ value, label, icon: Icon }) => (
           <div key={label} className="card" style={{ padding: 'clamp(16px,3vw,24px)', textAlign: 'center' }}>
             <Icon size={22} color="#c5a880" style={{ marginBottom: 8 }} />
