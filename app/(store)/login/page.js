@@ -49,15 +49,18 @@ function LoginFormContent() {
   }
 
   return (
-    <div style={{ maxWidth: 440, width: '100%', margin: '0 auto', padding: '40px 24px' }}>
-      <div style={{ textAlign: 'center', marginBottom: 36 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-serif)' }}>
-          Sign <span className="gradient-brand-text">In</span>
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: 15 }}>Welcome back! Sign in to manage your orders 🌸</p>
-      </div>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg,rgba(197,168,128,0.15),rgba(229,179,179,0.15))', border: '1.5px solid rgba(197,168,128,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#c5a880' }}>
+            <Lock size={24} />
+          </div>
+          <h1 style={{ fontSize: 'clamp(24px,4vw,32px)', fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-serif)' }}>
+            Sign <span className="gradient-brand-text">In</span>
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>Welcome back! Sign in to manage your orders 🌸</p>
+        </div>
 
-      <div className="card" style={{ padding: 32, background: '#fff', border: '1px solid #eae3dc', borderRadius: 20, boxShadow: '0 8px 30px rgba(0,0,0,0.03)' }}>
         {error && (
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '12px 14px', color: '#991b1b', fontSize: 13, marginBottom: 20 }}>
             <AlertCircle size={16} style={{ marginTop: 2, flexShrink: 0 }} />
@@ -103,26 +106,15 @@ function LoginFormContent() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary"
-            style={{
-              padding: '14px',
-              fontSize: 15,
-              fontWeight: 700,
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              opacity: loading ? 0.7 : 1,
-              marginTop: 8
-            }}
+            className="btn-gold"
+            style={{ padding: '14px', fontSize: 15, fontWeight: 700, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.7 : 1, marginTop: 4 }}
           >
             {loading ? 'Signing In…' : 'Sign In'} <ArrowRight size={16} />
           </button>
         </form>
 
         <div style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: '#6b7280' }}>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href={`/signup${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} style={{ color: '#c5a880', fontWeight: 600, textDecoration: 'none' }}>
             Register Now
           </Link>

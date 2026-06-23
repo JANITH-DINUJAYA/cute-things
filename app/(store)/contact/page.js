@@ -45,15 +45,15 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '64px 24px' }}>
-      <div style={{ textAlign: 'center', marginBottom: 56 }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', padding: 'clamp(32px,6vw,64px) clamp(16px,4vw,24px)' }}>
+      <div style={{ textAlign: 'center', marginBottom: 'clamp(32px,5vw,56px)' }}>
         <h1 style={{ fontSize: 'clamp(28px,5vw,48px)', fontWeight: 900, margin: '0 0 16px' }}>
           Contact <span className="gradient-brand-text">Us</span>
         </h1>
         <p style={{ fontSize: 17, color: '#6b7280' }}>We'd love to hear from you 💌</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'start' }}>
+      <div className="contact-grid">
 
         {/* Contact Info */}
         <div>
@@ -110,7 +110,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <style>{`@media(max-width:640px){div[style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}}`}</style>
+
     </div>
   );
 }

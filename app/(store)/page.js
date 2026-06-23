@@ -79,15 +79,15 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div style={{ display:'flex', gap:32, marginTop:48, flexWrap:'wrap' }}>
+            <div className="hero-stats-row" style={{ display:'flex', gap:'clamp(20px,5vw,32px)', marginTop:'clamp(32px,6vw,48px)', flexWrap:'wrap' }}>
               {[
                 ['5000+', 'Happy Clients'],
                 ['50+', 'Boutique Products'],
-                ['4.9', 'Client Rating']
+                ['4.9★', 'Client Rating']
               ].map(([val, label]) => (
                 <div key={label}>
-                  <div style={{ fontSize:26, fontWeight:700, fontFamily:'var(--font-sans)', color:'#c5a880', letterSpacing:'0.04em' }}>{val}</div>
-                  <div style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,.5)', textTransform:'uppercase', letterSpacing:'0.06em', marginTop:2 }}>{label}</div>
+                  <div style={{ fontSize:'clamp(20px,4vw,26px)', fontWeight:700, fontFamily:'var(--font-sans)', color:'#c5a880', letterSpacing:'0.04em' }}>{val}</div>
+                  <div style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,.5)', textTransform:'uppercase', letterSpacing:'0.06em', marginTop:2 }}>{label}</div>
                 </div>
               ))}
             </div>
@@ -102,13 +102,13 @@ export default async function HomePage() {
       </section>
 
       {/* ── Categories ───────────────────────────────────────────────────── */}
-      <section style={{ padding:'80px 24px', background:'#fff' }}>
+      <section style={{ padding:'clamp(48px,8vw,80px) clamp(16px,4vw,24px)', background:'#fff' }}>
         <div style={{ maxWidth:1200, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:48 }}>
-            <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 12px' }}>
+          <div style={{ textAlign:'center', marginBottom:'clamp(28px,5vw,48px)' }}>
+            <h2 style={{ fontSize:'clamp(24px,4vw,42px)', fontWeight:800, margin:'0 0 12px' }}>
               Shop by <span className="gradient-brand-text">Category</span>
             </h2>
-            <p style={{ color:'#6b7280', fontSize:16 }}>Find exactly what you're looking for</p>
+            <p style={{ color:'#6b7280', fontSize:'clamp(14px,2vw,16px)' }}>Find exactly what you're looking for</p>
           </div>
           <CategoryGrid categories={dbCategories} />
         </div>
@@ -116,20 +116,20 @@ export default async function HomePage() {
 
       {/* ── Featured Products ─────────────────────────────────────────────── */}
       {featured.length > 0 && (
-        <section style={{ padding:'80px 24px', background:'#faf8f6' }}>
+        <section style={{ padding:'clamp(48px,8vw,80px) clamp(16px,4vw,24px)', background:'#faf8f6' }}>
           <div style={{ maxWidth:1200, margin:'0 auto' }}>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:48, flexWrap:'wrap', gap:16 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'clamp(28px,5vw,48px)', flexWrap:'wrap', gap:16 }}>
               <div>
-                <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 2px' }}>
+                <h2 style={{ fontSize:'clamp(22px,4vw,42px)', fontWeight:800, margin:'0 0 4px' }}>
                   Featured <span className="gradient-brand-text">Products</span>
                 </h2>
-                <p style={{ color:'#6b7280', margin:0 }}>Our most loved items</p>
+                <p style={{ color:'#6b7280', margin:0, fontSize:14 }}>Our most loved items</p>
               </div>
               <Link href="/shop" className="btn-outline" style={{ textDecoration:'none' }}>
                 View All <ArrowRight size={16} />
               </Link>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:24 }}>
+            <div className="product-grid">
               {featured.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
@@ -138,20 +138,20 @@ export default async function HomePage() {
 
       {/* ── New Arrivals ──────────────────────────────────────────────────── */}
       {newArrivals.length > 0 && (
-        <section style={{ padding:'80px 24px', background:'#fff' }}>
+        <section style={{ padding:'clamp(48px,8vw,80px) clamp(16px,4vw,24px)', background:'#fff' }}>
           <div style={{ maxWidth:1200, margin:'0 auto' }}>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:48, flexWrap:'wrap', gap:16 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'clamp(28px,5vw,48px)', flexWrap:'wrap', gap:16 }}>
               <div>
-                <h2 style={{ fontSize:'clamp(28px,4vw,42px)', fontWeight:800, margin:'0 0 8px' }}>
+                <h2 style={{ fontSize:'clamp(22px,4vw,42px)', fontWeight:800, margin:'0 0 4px' }}>
                   New <span className="gradient-brand-text">Arrivals</span>
                 </h2>
-                <p style={{ color:'#6b7280', margin:0 }}>Fresh &amp; adorable additions</p>
+                <p style={{ color:'#6b7280', margin:0, fontSize:14 }}>Fresh &amp; adorable additions</p>
               </div>
               <Link href="/shop" className="btn-outline" style={{ textDecoration:'none' }}>
                 Shop All <ArrowRight size={16} />
               </Link>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:24 }}>
+            <div className="product-grid">
               {newArrivals.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
@@ -200,7 +200,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', gap:16, flexShrink:0 }}>
+            <div className="promo-banner-cards" style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', gap:16, flexShrink:0 }}>
               {[
                 { icon: Truck,     label: 'Island-wide shipping', sub: 'All 25 districts'  },
                 { icon: Shield,    label: 'Cash on Delivery',     sub: 'Pay when received' },
@@ -235,7 +235,7 @@ export default async function HomePage() {
       )}
 
       {/* ── TikTok CTA (light bg — breaks dark sections) ──────────────────── */}
-      <section style={{ padding:'80px 24px', background:'#faf8f6', textAlign:'center' }}>
+      <section style={{ padding:'clamp(48px,8vw,80px) clamp(16px,4vw,24px)', background:'#faf8f6', textAlign:'center' }}>
         <div style={{ maxWidth:1200, margin:'0 auto' }}>
           <div style={{ width:64, height:64, borderRadius:'50%', background:'linear-gradient(135deg,#1e1a1d,#333)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>

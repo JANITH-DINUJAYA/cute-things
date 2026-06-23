@@ -339,7 +339,6 @@ h1, h2, h3, h4, h5, h6, .font-serif {
 
 /* ── Storefront Mobile Layout Polish ──────────────────────────────────────── */
 .product-grid {
-
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
@@ -400,4 +399,202 @@ h1, h2, h3, h4, h5, h6, .font-serif {
 
 .mobile-menu-drawer {
   animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Responsive 2-col grid (used in About, Contact) ──────────────────────── */
+.two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .two-col-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+/* ── Global Section Padding — tighter on mobile ───────────────────────────── */
+@media (max-width: 640px) {
+  /* Sections */
+  section[style*="padding: 80px 24px"],
+  section[style*="padding:80px 24px"] {
+    padding: 48px 16px !important;
+  }
+  section[style*="padding: 64px 24px"],
+  section[style*="padding:64px 24px"] {
+    padding: 40px 16px !important;
+  }
+  section[style*="padding: 0 24px 80px"],
+  section[style*="padding:0 24px 80px"] {
+    padding: 0 16px 48px !important;
+  }
+
+  /* Hero section text */
+  section[style*="min-height: 80vh"] > div {
+    padding: 48px 20px !important;
+  }
+
+  /* Inner maxWidth containers */
+  div[style*="maxWidth: 1200"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  div[style*="maxWidth: 1100"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  div[style*="maxWidth: 1000"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  div[style*="maxWidth: 800"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Promotional banner inner */
+  .promo-banner-cards {
+    display: none !important;
+  }
+
+  /* Stats row — wrap nicely */
+  .hero-stats-row {
+    gap: 20px !important;
+    margin-top: 32px !important;
+  }
+
+  /* TikTok section: reduce top/bottom padding */
+  section[style*="textAlign: center"] {
+    padding: 40px 16px !important;
+  }
+
+  /* Delivery banner text */
+  div[style*="Island-wide"] {
+    font-size: 10px !important;
+    padding: 6px 12px !important;
+  }
+}
+
+/* ── Homepage — product grid min size tweak for small phones ─────────────── */
+@media (max-width: 480px) {
+  .hp-product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+
+/* ── Contact Page ─────────────────────────────────────────────────────────── */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .contact-grid {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+}
+
+/* ── About Page ───────────────────────────────────────────────────────────── */
+.about-values-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 480px) {
+  .about-values-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+}
+
+/* ── Auth pages (login / signup) ─────────────────────────────────────────── */
+.auth-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border: 1px solid rgba(197,168,128,0.15);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 8px 40px rgba(197,168,128,0.08);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 20px !important;
+    border-radius: 16px !important;
+  }
+}
+
+/* ── Track Order Page ─────────────────────────────────────────────────────── */
+.track-order-item {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 480px) {
+  .track-order-item {
+    grid-template-columns: 44px 1fr !important;
+  }
+  .track-order-price {
+    grid-column: 1 / -1 !important;
+    text-align: right !important;
+  }
+}
+
+/* ── Footer mobile ────────────────────────────────────────────────────────── */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 900px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 32px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+/* ── Shop page category pills — wrap nicely on mobile ────────────────────── */
+@media (max-width: 480px) {
+  .category-pills {
+    gap: 6px !important;
+  }
+  .category-pills a {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ── Video carousel — smaller cards on mobile ────────────────────────────── */
+@media (max-width: 480px) {
+  .tiktok-slider-row > div {
+    flex: 0 0 90% !important;
+  }
 }
